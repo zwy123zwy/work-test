@@ -1,4 +1,4 @@
-)/**
+/**
  * 修复后的高性能事件总线
  */
 class EventEmitter {
