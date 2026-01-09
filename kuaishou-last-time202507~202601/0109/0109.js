@@ -84,3 +84,108 @@ Promise.prototype.myAny = function (promises) {
         })
     })
 }
+
+// async
+function asyncGenerator(generator) {
+    return function () {
+        let iterator = generator();
+        return new Promise((resolve, reject) => {
+            function next(data) {
+                let { value, done } = iterator.next(data);
+                if (done) {
+                    resolve(value);
+                } else {
+                    Promise.resolve(value).then(res => next(res),
+                        err => reject(err)
+                    )
+                }
+            }
+        })
+    }
+}
+
+// promise
+function myPromise() {
+    const self = this;
+    self.status = 'pending';
+    self.value = null;
+    self.reason = null;
+    self.onResolvedCallbacks = [];
+    self.onRejectedCallbacks = [];
+
+    function resolve(value) {
+        if (value instanceof myPromise) {
+            value.then(resolve, reject);
+        }
+
+        setTimeout(() => {
+            if (self.status === 'pending') {
+                self.status = 'fulfilled';
+                self.value = value;
+                self.onResolvedCallbacks.forEach(fn => fn());
+            }
+        }, 0);
+    }
+
+    function reject(reason) {
+        setTimeout(() => {
+            if (self.status === 'pending') {
+                self.status = 'rejected';
+                self.reason = reason;
+                self.onRejectedCallbacks.forEach(fn => fn());
+            }
+        }, 0);
+    }
+
+    try {
+        fn(resolve, reject);
+    } catch (e) {
+        reject(e);
+    }
+}
+
+
+Promise.prototype.then = function (onResolved, onRejected) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+        function resolvePromise() {
+            try {
+                let x = onResolved(this.value);
+                if (x instanceof myPromise) {
+                    x.then(resolve, reject);
+                } else {
+                    resolve(x);
+                }
+            } catch (e) {
+                reject(e);
+            }
+        }
+
+        function rejectPromise() {
+            try {
+                let x = onRejected(this.reason);
+                if (x instanceof myPromise) {
+                    x.then(resolve, reject);
+                } else {
+                    resolve(x);
+                }
+            } catch (e) {
+                reject(e);
+            }
+        }
+
+        switch (self.status) {
+            case 'fulfilled':
+                onResolved(self.value);
+                break;
+            case 'rejected':
+                onRejected(self.reason);
+                break;
+
+            case 'pending':
+                self.onResolvedCallbacks.push(resolvePromise);
+                self.onRejectedCallbacks.push(rejectPromise);
+                break;
+        }
+    })
+}
