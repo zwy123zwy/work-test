@@ -234,4 +234,183 @@ SubType.prototype.sayAge = function () {
 };
 
 
+// sleep
+function sleep(time) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve();
+        }, time);
+    })
+}
 
+Array.prototype.flat = function (depth = 1) {
+    let result = [];
+    for (let i = 0; i < this.length; i++) {
+        if (Array.isArray(this[i]) && depth > 0) {
+            result = result.concat(this[i].flat(depth - 1));
+        } else {
+            result.push(this[i]);
+        }
+    }
+    return result;
+}
+
+// foreach
+Array.prototype.myForEach = function (callback) {
+    for (let i = 0; i < this.length; i++) {
+        callback(this[i], i, this);
+    }
+}
+
+// map
+Array.prototype.myMap = function (callback) {
+    let result = [];
+    for (let i = 0; i < this.length; i++) {
+        result.push(callback(this[i], i, this));
+    }
+    return result;
+}
+
+// filter
+Array.prototype.myFilter = function (callback) {
+    let result = [];
+    for (let i = 0; i < this.length; i++) {
+        if (callback(this[i], i, this)) {
+            result.push(this[i]);
+        }
+    }
+    return result;
+}
+
+// reduce
+Array.prototype.myReduce = function (callback, initialValue) {
+    let result = initialValue;
+    for (let i = 0; i < this.length; i++) {
+        result = callback(result, this[i], i, this);
+    }
+    return result;
+}
+
+// fill
+Array.prototype.myFill = function (value, start = 0, end = this.length) {
+    for (let i = start; i < end; i++) {
+        this[i] = value;
+    }
+    return this;
+}
+
+// includes
+Array.prototype.myIncludes = function (value, fromIndex = 0) {
+    for (let i = fromIndex; i < this.length; i++) {
+        if (this[i] === value) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// push
+Array.prototype.myPush = function (...args) {
+    for (let i = 0; i < args.length; i++) {
+        this[this.length] = args[i];
+    }
+    return this.length;
+}
+
+// pop
+Array.prototype.myPop = function () {
+    let result = this[this.length - 1];
+    this.length--;
+    return result;
+}
+
+// shift
+Array.prototype.myShift = function () {
+    let result = this[0];
+    for (let i = 1; i < this.length; i++) {
+        this[i - 1] = this[i];
+    }
+    this.length--;
+    return result;
+}
+
+// unshift
+
+Array.prototype.myUnshift = function (...args) {
+    for (let i = this.length - 1; i >= 0; i--) {
+        this[i + args.length] = this[i];
+    }
+    for (let i = 0; i < args.length; i++) {
+        this[i] = args[i];
+    }
+    return this.length;
+}
+
+// sort
+Array.prototype.mySort = function (compareFn) {
+    for (let i = 0; i < this.length; i++) {
+        for (let j = i + 1; j < this.length; j++) {
+            if (compareFn(this[i], this[j]) > 0) {
+                [this[i], this[j]] = [this[j], this[i]];
+            }
+        }
+    }
+    return this;
+}
+
+
+// new
+function myNew(fn, ...args) {
+    let obj = Object.create(fn.prototype);
+    let result = fn.call(obj, ...args);
+    return result instanceof Object ? result : obj;
+}
+
+// instanceof
+function myInstanceof(left, right) {
+    let proto = left.__proto__;
+    while (true) {
+        if (proto === null) {
+            return false;
+        }
+        if (proto === right.prototype) {
+            return true;
+        }
+        proto = proto.__proto__;
+    }
+}
+
+// trim
+String.prototype.myTrim = function () {
+    return this.replace(/^\s+|\s+$/g, '');
+}
+
+
+
+// debounce
+function debounce(fn, delay) {
+    let timer = null;
+    return function () {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+            fn.apply(this, arguments);
+        }, delay);
+    }
+}
+
+// throttle
+function throttle(fn, delay) {
+    let flag = true;
+    return function () {
+        if (!flag) {
+            return;
+        }
+        flag = false;
+        setTimeout(() => {
+            fn.apply(this, arguments);
+            flag = true;
+        }, delay);
+    }
+}
