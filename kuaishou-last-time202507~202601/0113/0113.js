@@ -142,3 +142,110 @@ console.log(zigzagLevelOrder(root2)); // [[1]]
 
 const root3 = null;
 console.log(zigzagLevelOrder(root3)); // []
+
+// 原型链式继承
+function Parent() {
+    this.name = 'parent';
+    this.colors = ['red', 'blue', 'green'];
+}
+Parent.prototype.getName = function () {
+    return this.name;
+}
+
+function Child() {
+    this.age = 10;
+}
+const parent1 = new Parent();
+Child.prototype = parent1;
+Child.prototype.constructor = Child;
+
+const child1 = new Child();
+
+console.log(child1.colors);
+child1.colors.push('yellow');
+console.log(child1.colors);
+console.log(parent1.colors);
+console.log(child1.name);
+
+// 单例模式
+function Singleton() {
+    if (Singleton.instance) {
+        return Singleton.instance;
+    }
+    this.name = 'singleton';
+    Singleton.instance = this;
+}
+// 发布-订阅模式
+class EventEmitter {
+    constructor() {
+        this.events = {};
+    }
+
+    on(event, listener) {
+        if (this.events[event]) {
+            this.events[event] = [...this.events[event], listener];
+        } else {
+            this.events[event] = listener;
+        }
+    }
+    emit(event, ...args) {
+        this.events[event].forEach(listener => listener(...args));
+    }
+
+    off(event, listener) {
+        if (this.events[event]) {
+            this.events[event] = this.events[event].filter(item => item !== listener);
+        }
+    }
+}
+
+
+// async 
+function asyncGenerator(genFn) {
+    return function (...args) {
+        const gen = genFn.apply(this, args);
+        return new Promise((resolve, reject) => {
+            function step(key, arg) {
+                let info;
+                try {
+                    info = gen[key](arg);
+                } catch (error) {
+                    return reject(error);
+                }
+                const { value, done } = info;
+                if (done) {
+                    return resolve(value);
+                } else {
+                    return Promise.resolve(value).then(
+                        val => step("next", val),
+                        err => step("throw", err)
+                    );
+                }
+            }
+            step("next");
+        });
+    }
+}
+
+// url to params
+function urlToParams(url) {
+    let params = {};
+    let queryString = url.split('?')[1];
+    if (!queryString) return params;
+    let pairs = queryString.split('&');
+    for (let pair of pairs) {
+        let [key, value] = pair.split('=');
+        if (value) {
+            if (params[key]) {
+                params[key] = [].concat(params[key], decodeURIComponent(value));
+            } else {
+                params[key] = decodeURIComponent(value);
+            }
+        } else {
+            params[key] = true;
+        }
+    }
+    return params;
+}
+
+
