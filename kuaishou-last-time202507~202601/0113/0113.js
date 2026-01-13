@@ -437,4 +437,86 @@ function lowestCommonAncestor(root, p, q) {
     return root.val > p.val && root.val > q.val ? 
     lowestCommonAncestor(root.left, p, q) : root.val < p.val && root.val < q.val ? lowestCommonAncestor(root.right, p, q) : root;
 }
+// 用两个栈实现队列
+class MyQueue {
+    constructor() {
+        this.stack1 = [];
+        this.stack2 = [];
+    }
+    push(x) {
+        this.stack1.push(x);
+    }
+    pop() {
+        if (this.stack2.length === 0) {
+            while (this.stack1.length !== 0) {
+                this.stack2.push(this.stack1.pop());
+            }
+        }
+        return this.stack2.pop();
+    }
+    peek() {
+        if (this.stack2.length === 0) {
+            while (this.stack1.length !== 0) {
+                this.stack2.push(this.stack1.pop());
+            }
+        }
+        return this.stack2[this.stack2.length - 1];
+    }
+    empty() {
+        return this.stack1.length === 0 && this.stack2.length === 0;
+    }
+    
+    
 
+}  
+// 包含栈的min函数
+class MinStack { 
+    constructor() {
+        this.stack = [];
+        this.minStack = [];
+    }
+    push(x) {
+        this.stack.push(x);
+        if (this.minStack.length === 0 || x <= this.minStack[this.minStack.length - 1]) {
+            this.minStack.push(x);
+        }
+    }
+    pop() {
+        let x = this.stack.pop();
+        if (x === this.minStack[this.minStack.length - 1]) {
+            this.minStack.pop();
+            this.minStack.pop();    
+        }   
+        return x;
+    }
+    top() {
+        return this.stack[this.stack.length - 1];
+    }
+    getMin() {
+        return this.minStack[this.minStack.length - 1];
+    }
+}
+
+// 包含min函数的栈
+// 有效括号序列
+// 滑动窗口的最大值
+
+// 最小的K个数
+ function getLeastNumbers(arr, k) {
+    arr.sort((a, b) => a - b);
+    return arr.slice(0, k);
+}
+
+// 寻找第K大
+function findKthLargest(nums, k) {
+    nums.sort((a, b) => b - a);
+    return nums[k - 1];
+}
+ 
+// 数据流中的中位数
+function mid(array){
+    array.sort((a,b)=>a-b);
+    let mid = Math.floor(n / 2);
+    return array[mid];
+}
+// 表达式求值
