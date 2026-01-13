@@ -247,5 +247,194 @@ function urlToParams(url) {
     }
     return params;
 }
+console.log(urlToParams('http://www.baidu.com?name=zhangsan&age=18&skill=js&skill=node'));
+// 二叉树的前序遍历 中左右
+function preorderTraversal(root) {
+    if (!root) return [];
+    let result = [];
+    let stack = [root];
+    while (stack.length) {
+        let node = stack.pop();
+        result.push(node.val);
+        if (node.right) stack.push(node.right);
+        if (node.left) stack.push(node.left);
+    }
+    return result;
+}
 
+// 二叉树的中序遍历 左中右
+function inorderTraversal(root) {
+    if (!root) return [];
+    let result = [];
+    let stack = [];
+    let current = root;
+    while (current || stack.length) {
+        while (current) {
+            stack.push(current);
+            current = current.left;
+        }
+        current = stack.pop();
+        result.push(current.val);
+        current = current.right;
+    }
+    return result;
+}
+console.log(inorderTraversal(root1));
+console.log(preorderTraversal(root1));
+// 二叉树的后序遍历 左右中
+function postorderTraversal(root) {
+    if (!root) return [];
+    let result = [];
+    let stack = [root];
+    while (stack.length) {
+        let node = stack.pop();
+        result.push(node.val);
+        if (node.left) stack.push(node.left);
+        if (node.right) stack.push(node.right);
+    }
+    return result.reverse();
+}
+// 求二叉树的层序遍历
+function levelOrder(root) {
+    if (!root) return [];
+    let result = [];
+    let queue = [root];
+    while (queue.length) {
+        let size = queue.length;
+        let currentLevel = [];
+        for (let i = 0; i < size; i++) {
+            let node = queue.shift();
+            currentLevel.push(node.val);
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        result.push(currentLevel);
+    }
+    return result;
+}
+
+// 按之字形顺序打印二叉树
+function zigzagLevelOrder(root) {
+    if (!root) return [];
+    let result = [];
+    let queue = [root];
+    let flag = true;
+    while (queue.length) {
+        let size = queue.length;
+        let currentLevel = [];
+        for (let i = 0; i < size; i++) {
+            let node = queue.shift();
+            currentLevel.push(node.val);
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        if (!flag) {
+            currentLevel.reverse();
+        }
+        result.push(currentLevel);
+        flag = !flag;
+    }
+    return result;
+}
+// 二叉树的最大深度
+function maxDepth(root) {
+    if (!root) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+// 二叉树中和为某一值的路径(一)
+function pathSum(root, targetSum) {}
+    let result = [];
+    function dfs(node, currentPath, currentSum) {
+        if (!node) return;
+        currentPath.push(node.val);
+        currentSum += node.val;
+        if (!node.left && !node.right && currentSum === targetSum) {
+            result.push([...currentPath]);
+        }
+        dfs(node.left, currentPath, currentSum);
+        dfs(node.right, currentPath, currentSum);
+        currentPath.pop();
+    }
+    dfs(root, [], 0);
+    return result;
+}
+// 二叉搜索树与双向链表
+// 对称的二叉树
+function isSymmetric(root) {
+    if (!root) return true;
+    function isMirror(node1, node2) {
+        if (!node1 && !node2) return true;
+        if (!node1 || !node2) return false;
+        return node1.val === node2.val && isMirror(node1.left, node2.right) && isMirror(node1.right, node2.left);
+    }
+    return isMirror(root.left, root.right);
+}
+// 合并二叉树
+function mergeTrees(root1, root2) {
+    if (!root1) return root2;
+    if (!root2) return root1;
+    root1.val += root2.val;
+    root1.left = mergeTrees(root1.left, root2.left);
+    root1.right = mergeTrees(root1.right, root2.right);
+    return root1;
+}
+
+// 二叉树的镜像
+function mirrorTree(root) {
+    if (!root) return null;
+    let temp = root.left;
+    root.left = mirrorTree(root.right);
+    root.right = mirrorTree(temp);
+    return root;
+}
+// 判断是不是二叉搜索树
+function isValidBST(root) {
+    if (!root) return true;
+    let stack = [root];
+    let prev = null;
+    while (stack.length) {
+        let node = stack.pop();
+        if (node) {
+            if (node.right) stack.push(node.right);
+            stack.push(node);
+            stack.push(null);
+            if (node.left) stack.push(node.left);
+        }
+    }
+}
+
+// 判断是不是完全二叉树
+
+function isValidBST(root) {
+    if (!root) return true;
+    let stack = [root];
+    let prev = null;
+    while (stack.length) {
+        let node = stack.pop();
+        if (node) {
+            if (node.right) stack.push(node.right);
+            stack.push(node);
+            stack.push(null);
+            if (node.left) stack.push(node.left);
+        } else {
+            node = stack.pop();
+            if (prev !== null && node.val <= prev) return false;
+            prev = node.val;
+        } 
+    }
+    return true;
+}
+// 判断是不是平衡二叉树
+function isBalanced(root) {
+    if (!root) return true;
+    let leftHeight = maxDepth(root.left);
+    let rightHeight = maxDepth(root.right);
+    return Math.abs(leftHeight - rightHeight) <= 1 && isBalanced(root.left) && isBalanced(root.right);
+}
+// 二叉搜索树的最近公共祖先
+function lowestCommonAncestor(root, p, q) {
+    if (!root) return null; 
+    return root.val > p.val && root.val > q.val ? 
+    lowestCommonAncestor(root.left, p, q) : root.val < p.val && root.val < q.val ? lowestCommonAncestor(root.right, p, q) : root;
+}
 
