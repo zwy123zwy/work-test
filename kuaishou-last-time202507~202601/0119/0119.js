@@ -358,3 +358,267 @@ class Scheduler {
     }
 }
 
+// {
+//     tag: 'DIV',
+//  attrs: { id: 'app' },   children: [
+//             {
+//                 tag: 'SPAN',
+//                 children: [
+//                     { tag: 'A', children: [] }
+//                 ]
+//             },
+//             {
+//                 tag: 'SPAN',
+//                 children: [
+//                     { tag: 'A', children: [] },
+//                     { tag: 'A', children: [] }
+//                 ]
+//             }
+//         ]
+// }
+
+function dom2Json(domtree) {
+    let obj = {};
+    obj.name = domtree.tagName;
+    obj.children = [];
+    domtree.childNodes.forEach((child) => obj.children.push(dom2Json(child)));
+    return obj;
+}
+
+
+
+// 真正的渲染函数
+function _render(vnode) {
+    // 如果是数字类型转化为字符串
+    if (typeof vnode === "number") {
+        vnode = String(vnode);
+    }
+    // 字符串类型直接就是文本节点
+    if (typeof vnode === "string") {
+        return document.createTextNode(vnode);
+    }
+    // 普通DOM
+    const dom = document.createElement(vnode.tag);
+    if (vnode.attrs) {
+        // 遍历属性
+        Object.keys(vnode.attrs).forEach((key) => {
+            const value = vnode.attrs[key];
+            dom.setAttribute(key, value);
+        });
+    }
+    // 子数组进行递归操作
+    vnode.children.forEach((child) => dom.appendChild(_render(child)));
+    return dom;
+}
+
+
+class Scheduler{
+    constructor(limit) {
+        this.queue = [];
+        this.runningCount = 0;
+        this.limit = limit;
+    }
+    add(task) {
+        this.queue.push(task);
+        this.run();
+    }
+    run() {
+        if (this.runningCount >= this.limit || this.queue.length === 0) {
+            return;
+        }
+        const task = this.queue.shift();
+        this.runningCount++;
+        task().finally(() => {
+            this.runningCount--;
+            this.run();
+        });
+    }
+}
+
+// 示例调用
+const scheduler = new Scheduler(2);
+const timeout = (time) => new Promise(resolve => setTimeout(resolve, time));
+const addTask = (time, order) => {
+  scheduler.add(() => timeout(time).then(() => console.log(order)));
+};
+
+// 期望输出顺序：
+// 一开始运行 1, 2
+// 
+// const timeout = (time) => new Promise(resolve => setTimeout(resolve, time));1 完成，输出 '1'，放入 3
+// 2 完成，输出 '2'，放入 4
+// 3 完成，输出 '3'
+// 4 完成，输出 '4'
+addTask(1000, '1');
+addTask(500, '2');
+addTask(300, '3');
+addTask(400, '4');
+
+
+function findLowestCommonAncestor(node1, node2) {
+    // 你的代码
+    const pathToRoot = (node) => {
+        const path = [];
+        while (node) {
+            path.push(node);
+            node = node.parent;
+        }
+        return path;
+    };
+
+    const path1 = pathToRoot(node1).reverse();
+    const path2 = pathToRoot(node2).reverse();
+
+    let lca = null;
+    const minLength = Math.min(path1.length, path2.length);
+    for (let i = 0; i < minLength; i++) {
+        if (path1[i] === path2[i]) {
+            lca = path1[i];
+        } else {
+            break;
+        }
+    }
+    return lca;
+}
+
+class LRUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.map = new Map();
+            }
+    get(key) {
+        if (this.map.has(key)) {
+            const value = this.map.get(key);
+            this.map.delete(key);
+            this.map.set(key, value);
+            return value;
+        }
+    }
+    put(key, value) {
+        if (this.map.has(key)) {
+            this.map.delete(key);
+        } else if (this.map.size >= this.capacity) {
+            this.map.delete(this.map.keys().next().value);
+        }
+        this.map.set(key, value);
+    }
+}
+// 实现一个节流函数 (Throttle) - 支持配置首尾执行
+
+// 关联简历： “金币夺宝”的按钮防连点、“页面滚动监听”。
+// 题目描述： 实现 throttle(fn, wait, { leading: true, trailing: false })。
+// 考察点： 时间戳 vs 定时器的区别、边界条件的精细控制。虽然简单，但要写得 bug-free 不容易。
+
+function throttle(fn, wait, options = {}) {
+    let timeout = null;
+    let lastArgs = null;
+    let lastThis = null;
+    let lastCallTime = null;
+    let result = null;
+    const { leading = false, trailing = true } = options;
+    const now = Date.now;
+    const remaining = function (time) {
+        return wait - (now() - time);
+    };
+    const shouldInvoke = function (time) {
+        return !lastCallTime || remaining(time) <= 0;return !lastCallTime || remaining(time) <= 0;
+    }
+    const invokeFunc = function (time) {
+        lastCallTime = time;
+        result = fn.apply(lastThis, lastArgs);
+        lastArgs = null;
+        lastThis = null;
+        return result;
+    }
+    const timerExpired = function () {
+        const time = now();
+        if (shouldInvoke(time)) {
+            invokeFunc(time);
+        } else {
+            timeout = setTimeout(timerExpired, remaining(time));
+        }
+    }
+    return function (...args) {
+        const time = now();
+        const isInvoking = shouldInvoke(time);
+        lastArgs = args;
+        lastThis = this;
+
+        if (isInvoking) {
+            if (timeout === null) {
+                if (leading) {
+                    return invokeFunc(time);
+                }
+                timeout = setTimeout(timerExpired, wait);
+            }
+        } else if (timeout === null && trailing) {
+            timeout = setTimeout(timerExpired, wait);
+        }
+        return result;
+    };
+}
+
+
+function debounce(fn, wait, options = {}) {
+    let timeout = null;
+    let lastArgs = null;
+    let lastThis = null;
+    let result = null;
+    const { leading = false, trailing = true } = options;
+
+    const invokeFunc = function () {
+        result = fn.apply(lastThis, lastArgs);
+        lastArgs = null;
+        lastThis = null;
+        return result;
+    };
+
+    const startTimer = function () {
+        timeout = setTimeout(() => {
+            timeout = null;
+            if (trailing && lastArgs) {
+                invokeFunc();
+            }
+        }, wait);
+    };
+
+    return function (...args) {
+        lastArgs = args;
+        lastThis = this;
+
+        if (timeout === null) {
+            if (leading) {
+                invokeFunc();
+            }
+            startTimer();
+        } else {
+            clearTimeout(timeout);
+            startTimer();
+        }
+        return result;
+    } 
+}
+
+
+function lis(nodes){
+    const n = nodes.length;
+    const dp = new Array(n).fill(1);
+    for(let i=1;i<n;i++){
+        for(let j=0;j<i;j++){
+            if(nodes[i]>nodes[j]){
+                dp[i] = Math.max(dp[i],dp[j]+1);
+            }
+        }
+    }
+    return Math.max(...dp);
+}
+
+function join(...args) {
+    return args.join("_");
+}
+
+// 二叉树的 最大深度 是指从根节点到最远叶子节点的最长路径上的节点数。
+var maxDepth = function (root) {    
+    if (!root) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+};
