@@ -106,30 +106,30 @@ function compose(middlewares) {
 // 进阶要求：支持 namespace（如 emit('scope:event')）或支持“先发布后订阅”（缓存历史消息）。
 // 考察点：设计模式、闭包、内存泄漏防范（off 的实现细节）。
 
-class EventEmitter { 
+class EventEmitter {
     constructor() {
         this.events = {};
     }
-    
+
     on(event, listener) {
         if (!this.events[event]) {
             this.events[event] = [];
         }
         this.events[event].push(listener);
     }
-    
+
     emit(event, ...args) {
         if (this.events[event]) {
             this.events[event].forEach(listener => listener(...args));
         }
     }
-    
+
     off(event, listener) {
         if (this.events[event]) {
             this.events[event] = this.events[event].filter(l => l !== listener);
         }
     }
-    
+
     once(event, listener) {
         const onceListener = (...args) => {
             listener(...args);
@@ -151,7 +151,7 @@ function calculateVisibleItems(data, containerHeight, scrollTop) {
     let totalHeight = 0;
     let startIndex = 0;
     let endIndex = data.length - 1;
-    
+
     // 计算 startIndex
     for (let i = 0; i < data.length; i++) {
         if (totalHeight + data[i].height > scrollTop) {
@@ -161,7 +161,7 @@ function calculateVisibleItems(data, containerHeight, scrollTop) {
         totalHeight += data[i].height;
     }
     // 计算 endIndex
-    totalHeight = 0;    
+    totalHeight = 0;
     for (let i = startIndex; i < data.length; i++) {
         totalHeight += data[i].height;
         if (totalHeight >= containerHeight) {
@@ -169,7 +169,7 @@ function calculateVisibleItems(data, containerHeight, scrollTop) {
             break;
         }
     }
-    
+
     const renderList = data.slice(startIndex, endIndex + 1);
     return { startIndex, renderList };
 }
@@ -193,7 +193,7 @@ class LRUCache {
         this.cache.set(key, value);
         return value;
     }
-    
+
     put(key, value) {
         if (this.cache.has(key)) {
             this.cache.delete(key);
@@ -215,11 +215,11 @@ class LRUCache {
 function arrayToTree(items) {
     const map = {};
     const tree = [];
-    
+
     items.forEach(item => {
-        map[item.id] = {...item, children: []};
+        map[item.id] = { ...item, children: [] };
     });
-    
+
     items.forEach(item => {
         if (item.pid === 0) {
             tree.push(map[item.id]);
@@ -229,7 +229,7 @@ function arrayToTree(items) {
             }
         }
     });
-    
+
     return tree;
 }
 
@@ -245,38 +245,38 @@ function deepClone(obj, hash = new WeakMap()) {
     if (obj === null || typeof obj !== 'object') {
         return obj;
     }
-    
+
     if (obj instanceof Date) {
         return new Date(obj);
     }
-    
+
     if (obj instanceof RegExp) {
         return new RegExp(obj);
     }
-    
+
     if (hash.has(obj)) {
         return hash.get(obj);
     }
-    
+
     const cloneObj = Array.isArray(obj) ? [] : {};
     hash.set(obj, cloneObj);
-    
+
     for (let key in obj) {
         if (obj.hasOwnProperty(key)) {
             cloneObj[key] = deepClone(obj[key], hash);
         }
     }
-    
+
     return cloneObj;
 }
 
-Promise.myAll = function(promises) {
+Promise.myAll = function (promises) {
     return new Promise((resolve, reject) => {
         // 边界判断：传入的必须是数组（或可迭代对象）
         if (!Array.isArray(promises)) {
             return reject(new TypeError('Argument must be an array'));
         }
-        
+
         let result = [];
         let count = 0;
         const len = promises.length;
@@ -300,13 +300,13 @@ Promise.myAll = function(promises) {
     });
 };
 
-Promise.myRace = function(promises) {
+Promise.myRace = function (promises) {
     return new Promise((resolve, reject) => {
         // 边界判断：传入的必须是数组（或可迭代对象）
         if (!Array.isArray(promises)) {
             return reject(new TypeError('Argument must be an array'));
         }
-        
+
         promises.forEach(p => {
             // P7 细节：用 Promise.resolve 包裹，防止数组里有非 Promise 值（如数字、字符串）
             Promise.resolve(p).then(res => {
@@ -318,3 +318,43 @@ Promise.myRace = function(promises) {
     });
 }
 
+// console.log(1); //1
+
+// setTimeout(() => {
+//     console.log(2);
+// }, 0);
+
+// Promise.resolve().then(() => {
+//     console.log(3); // a1
+// }).then(() => {
+//     console.log(4);
+// });
+
+// async function async1() {
+//     console.log(5); //2 
+//     await async2(); // a2
+//     console.log(6);
+// }
+
+// async function async2() {
+//     console.log(7); //3
+// }
+
+// async1();
+// console.log(8); // 4
+
+function foo() {
+    console.log(this.a);
+}
+
+function doFoo() {
+    foo();
+}
+
+var obj = {
+    a: 1,
+    doFoo: doFoo
+};
+
+var a = 2;
+obj.doFoo()
