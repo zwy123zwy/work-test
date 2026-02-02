@@ -432,3 +432,96 @@ promise.then(value => {
     console.log(value);
 });
 
+
+
+
+// promise.all
+function promiseAll(promises) {
+    return new Promise((resolve, reject) => {
+        let count = 0;
+        let result = [];
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(res => {
+                count++;
+                result[i] = res;
+                if (count === promises.length) {
+                    resolve(result);
+                }
+            }).catch(err => {
+                reject(err);
+            })
+        }
+    })
+}
+
+const promiseAll = new PromiseAll([promise1, promise2, promise3]);
+console.log(promiseAll);
+
+// promise.race
+function promiseRace(promises) {
+    return new Promise((resolve, reject) => {
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(res => {
+                resolve(res);
+            }).catch(err => {
+                reject(err);
+            })
+        }
+    })
+}
+
+// promise.any
+function promiseAny(promises) {
+    return new Promise((resolve, reject) => {
+        let count = 0;
+        let result = [];
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(res => {
+                resolve(res);
+            }).catch(err => {
+                count++;
+                if (count === promises.length) {
+                    reject(new Error('All promises were rejected'));
+                }
+            })
+        }
+    })
+
+}
+
+// promise.allSettled
+function promiseAllSettled(promises) {
+    return new Promise((resolve, reject) => {
+        let count = 0;
+        let result = [];
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(res => {
+                count++;
+                result[i] = {
+                    status: 'fulfilled',
+                    value: res
+                };
+            }).catch(err => {
+                count++;
+                result[i] = {
+                    status: 'rejected',
+                    reason: err
+                };
+            }).finally(() => {
+                if (count === promises.length) {
+                    resolve(result);
+                }
+            })
+        }       
+    })
+}
+
+const promiseAllSettled = new PromiseAllSettled([promise1, promise2, promise3]);
+console.log(promiseAllSettled);
+
+// promise.any
+function promiseAny(promises) {
+    return new Promise((resolve, reject) => {
+        let count = 0;
+        let result = [];
+        for (let i = 0; i < promises.length; i++) {
