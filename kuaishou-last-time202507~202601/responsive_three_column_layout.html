@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>响应式三桶布局</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        /* 三桶布局容器 */
+        .three-column-layout {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* 通用列样式 */
+        .column {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex: 1; /* 平均分配空间 */
+        }
+
+        .column h2 {
+            color: #444;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .column p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            .three-column-layout {
+                flex-direction: column; /* 在小屏幕上垂直堆叠 */
+            }
+            
+            .column {
+                min-height: 200px; /* 确保每列有最小高度 */
+            }
+        }
+
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .three-column-layout {
+                gap: 15px;
+            }
+        }
+
+        /* 添加一些视觉区分 */
+        .column:nth-child(1) {
+            border-left: 4px solid #3498db;
+        }
+
+        .column:nth-child(2) {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .column:nth-child(3) {
+            border-left: 4px solid #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>响应式三桶布局</h1>
+        
+        <div class="three-column-layout">
+            <div class="column">
+                <h2>第一列</h2>
+                <p>这是第一列的内容。在大屏幕上，这三列会并排显示。在小屏幕上，它们会垂直堆叠。</p>
+                <p>这种布局使用了Flexbox技术，具有良好的响应性，并且可以根据屏幕尺寸自动调整。</p>
+            </div>
+            
+            <div class="column">
+                <h2>第二列</h2>
+                <p>这是第二列的内容。当您调整浏览器窗口大小时，布局会相应地适应不同的屏幕尺寸。</p>
+                <p>在移动设备上，三列会垂直堆叠，提供更好的用户体验。</p>
+            </div>
+            
+            <div class="column">
+                <h2>第三列</h2>
+                <p>这是第三列的内容。使用CSS媒体查询实现响应式设计，确保在各种设备上都能良好显示。</p>
+                <p>您可以尝试调整浏览器窗口大小，查看布局如何响应变化。</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
