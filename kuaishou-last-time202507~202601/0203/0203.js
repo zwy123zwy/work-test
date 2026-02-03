@@ -329,3 +329,33 @@ component.increment();
 
 console.log("\n更改姓名:");
 component.updateName("Alice");
+
+
+// 解析url
+function parseUrl(url) {
+    const urlParts = url.split('?');
+    const baseUrl = urlParts[0];
+    const queryString = urlParts[1];
+    
+    const queryParams = {};
+    if (queryString) {
+        const params = queryString.split('&');
+        params.forEach(param => {
+            const [key, value] = param.split('=');
+            queryParams[key] = value;
+        })
+    }
+    return { baseUrl, queryParams };
+}
+// 数组去重
+function removeDuplicates(arr) {
+    return [...new Set(arr)];
+}
+
+console.log(parseUrl('https://example.com/path?param1=value1&param2=value2'));
+console.log(removeDuplicates([1, 2, 2, 3, 4, 4, 5]));
+function isPalindrome(str) {
+    const reversedStr = str.split('').reverse().join('');
+    return str === reversedStr;
+}
+// 回文字符串判断
