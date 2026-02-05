@@ -23,6 +23,10 @@
 
 - （无）
 
+## Rules
+
+- **题目不重复**：新增题目（算法题、八股题、AI 规范题等）不得与项目中已有题目重复。出题前需检索现有目录与文件（如各 MMDD 目录下的 .js 文件及 0204-8gu、0204-ai 等），确保题干、考点或实现思路不与已有题目雷同。
+
 ## Impact
 
 - **代码结构**：`openspec/specs/` 下新增 `algo-recording`、`algo-organization`、`algo-conventions` 规范

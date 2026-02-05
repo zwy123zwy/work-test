@@ -1,13 +1,9 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context (shown to AI when creating artifacts)
+context: |
+  Tech stack: JavaScript, TypeScript, HTML, CSS.
+  Rule: 出的题目不允许重复。新增题目前需检索现有 MMDD 目录及 0204-8gu、0204-ai 等文件，确保与已有题目（题干、考点、实现）不重复。
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
