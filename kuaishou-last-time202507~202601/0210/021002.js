@@ -25,7 +25,15 @@ class TreeNode {
 // 输出：[i, j] 满足 nums[i] + nums[j] === target
 // 约束：同一元素不可重复使用；可 O(n) 时间 + 哈希
 
-// 实现：
+function twoSum(nums, target) {
+    const map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const j = map.get(target - nums[i]);
+        if (j !== undefined) return [j, i];
+        map.set(nums[i], i);
+    }
+    return [];
+}
 
 
 
@@ -113,7 +121,15 @@ function levelOrder(root) {
 // 输出：number
 // 约束：若无法获利返回 0
 
-// 实现：
+function maxProfit(prices) {
+    if (!prices.length) return 0;
+    let min = prices[0], profit = 0;
+    for (const p of prices) {
+        profit = Math.max(profit, p - min);
+        min = Math.min(min, p);
+    }
+    return profit;
+}
 
 
 // ==================== 6. 有效的括号 ====================
@@ -217,17 +233,17 @@ function threeSum(nums) {
 // 输出：number
 // 约束：DFS/BFS 标记连通块
 
-// 实现：
-
 function numIslands(grid) {
-    if(grid.length === 0) return 0;
+    if (!grid.length) return 0;
     let res = 0;
-    for(let i = 0; i < grid.length; i++) {
-        for(let j = 0; j < grid[i].length; j++) {
-            if(grid[i][j] === '1') {
-                res++;
-            }
-            dfs(grid, i, j);
+    const dfs = (i, j) => {
+        if (i < 0 || i >= grid.length || j < 0 || j >= grid[0].length || grid[i][j] !== '1') return;
+        grid[i][j] = '0';
+        dfs(i + 1, j); dfs(i - 1, j); dfs(i, j + 1); dfs(i, j - 1);
+    };
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            if (grid[i][j] === '1') { res++; dfs(i, j); }
         }
     }
     return res;
@@ -260,7 +276,19 @@ function lengthOfLIS(nums) {
 // 输出：number
 // 约束：双指针 / 单调栈 / 左右前缀最大值
 
-// 实现：
+function trap(height) {
+    let l = 0, r = height.length - 1, lm = 0, rm = 0, ans = 0;
+    while (l < r) {
+        if (height[l] < height[r]) {
+            lm = Math.max(lm, height[l]);
+            ans += lm - height[l++];
+        } else {
+            rm = Math.max(rm, height[r]);
+            ans += rm - height[r--];
+        }
+    }
+    return ans;
+}
 
 
 // ==================== 13. 字符串相加（大数） ====================
@@ -269,7 +297,16 @@ function lengthOfLIS(nums) {
 // 输出：string
 // 约束：模拟竖式加法
 
-// 实现：
+function addStrings(num1, num2) {
+    let i = num1.length - 1, j = num2.length - 1, carry = 0, res = '';
+    while (i >= 0 || j >= 0 || carry) {
+        const a = i >= 0 ? +num1[i--] : 0, b = j >= 0 ? +num2[j--] : 0;
+        const sum = a + b + carry;
+        res = (sum % 10) + res;
+        carry = sum > 9 ? 1 : 0;
+    }
+    return res;
+}
 
 
 // ==================== 14. 二叉搜索树的最近公共祖先 ====================
@@ -298,7 +335,19 @@ function lowestCommonAncestor(root, p, q) {
 // 输出：number[][]
 // 约束：回溯
 
-// 实现：
+function permute(nums) {
+    const res = [];
+    const dfs = (path, rest) => {
+        if (!rest.length) { res.push([...path]); return; }
+        for (let i = 0; i < rest.length; i++) {
+            path.push(rest[i]);
+            dfs(path, rest.slice(0, i).concat(rest.slice(i + 1)));
+            path.pop();
+        }
+    };
+    dfs([], nums);
+    return res;
+}
 
 
 // ==================== 16. 最长回文子串 ====================
@@ -310,7 +359,17 @@ function lowestCommonAncestor(root, p, q) {
 // 实现：
 
 function longestPalindrome(s) {
-
+    const expand = (l, r) => {
+        while (l >= 0 && r < s.length && s[l] === s[r]) { l--; r++; }
+        return s.slice(l + 1, r);
+    };
+    let best = '';
+    for (let i = 0; i < s.length; i++) {
+        const a = expand(i, i), b = expand(i, i + 1);
+        if (a.length > best.length) best = a;
+        if (b.length > best.length) best = b;
+    }
+    return best;
 }
 
 // ==================== 17. 合并区间 ====================
@@ -402,8 +461,11 @@ function rightSideView(root) {
 // 输出：number
 // 约束：可 O(n) 贪心/DP（Kadane）
 
-// 实现：
-
 function maxSubArray(nums) {
-   
+    let cur = nums[0], max = nums[0];
+    for (let i = 1; i < nums.length; i++) {
+        cur = Math.max(nums[i], cur + nums[i]);
+        max = Math.max(max, cur);
+    }
+    return max;
 }
