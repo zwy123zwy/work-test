@@ -7,176 +7,298 @@ class ListNode { constructor(val, next = null) { this.val = val; this.next = nex
 class TreeNode { constructor(val, left = null, right = null) { this.val = val; this.left = left; this.right = right; } }
 
 // ==================== 1. 区域和检索 - 数组不可变 ====================
-// 题干：设计类，支持多次查询 [left, right] 区间和。
-// 输入：nums，方法 sumRange(left, right)
-// 输出：number
-// 约束：前缀和
-
-// 实现：
-
+class NumArray {
+    constructor(nums) {
+        this.pre = [0];
+        for (const x of nums) this.pre.push(this.pre[this.pre.length - 1] + x);
+    }
+    sumRange(left, right) {
+        return this.pre[right + 1] - this.pre[left];
+    }
+}
 
 // ==================== 2. 二维区域和检索 - 矩阵不可变 ====================
-// 题干：二维矩阵，查询子矩阵 (r1,c1) 到 (r2,c2) 的和。
-// 输入：matrix，方法 sumRegion(r1,c1,r2,c2)
-// 输出：number
-// 约束：二维前缀和
-
-// 实现：
-
+class NumMatrix {
+    constructor(matrix) {
+        const m = matrix.length, n = matrix[0]?.length || 0;
+        this.pre = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+        for (let i = 0; i < m; i++)
+            for (let j = 0; j < n; j++)
+                this.pre[i + 1][j + 1] = matrix[i][j] + this.pre[i][j + 1] + this.pre[i + 1][j] - this.pre[i][j];
+    }
+    sumRegion(r1, c1, r2, c2) {
+        return this.pre[r2 + 1][c2 + 1] - this.pre[r1][c2 + 1] - this.pre[r2 + 1][c1] + this.pre[r1][c1];
+    }
+}
 
 // ==================== 3. 和为 K 的子数组 ====================
-// 题干：整数数组 nums 和 k，和为 k 的连续子数组个数。
-// 输入：nums: number[], k: number
-// 输出：number
-// 约束：前缀和 + 哈希
-
-// 实现：
-
+function subarraySum(nums, k) {
+    const map = new Map([[0, 1]]);
+    let sum = 0, count = 0;
+    for (const x of nums) {
+        sum += x;
+        count += map.get(sum - k) || 0;
+        map.set(sum, (map.get(sum) || 0) + 1);
+    }
+    return count;
+}
 
 // ==================== 4. 连续数组 ====================
-// 题干：二进制数组 nums，求含相同数量 0 和 1 的最长连续子数组长度。
-// 输入：nums: number[]
-// 输出：number
-// 约束：前缀和（0 当 -1） + 哈希
-
-// 实现：
-
+function findMaxLength(nums) {
+    const map = new Map([[0, -1]]);
+    let sum = 0, maxLen = 0;
+    for (let i = 0; i < nums.length; i++) {
+        sum += nums[i] === 1 ? 1 : -1;
+        if (map.has(sum)) maxLen = Math.max(maxLen, i - map.get(sum));
+        else map.set(sum, i);
+    }
+    return maxLen;
+}
 
 // ==================== 5. 除自身以外数组的乘积 ====================
-// 题干：数组 nums，返回数组 ans，ans[i] 为除 nums[i] 外其余元素乘积。要求 O(n) 且不用除法。
-// 输入：nums: number[]
-// 输出：number[]
-// 约束：前缀积 × 后缀积
-
-// 实现：
-
+function productExceptSelf(nums) {
+    const n = nums.length;
+    const ans = Array(n).fill(1);
+    for (let i = 1; i < n; i++) ans[i] = ans[i - 1] * nums[i - 1];
+    let suf = 1;
+    for (let i = n - 1; i >= 0; i--) {
+        ans[i] *= suf;
+        suf *= nums[i];
+    }
+    return ans;
+}
 
 // ==================== 6. 子数组和整除 K ====================
-// 题干：整数数组 nums 和 k，和能被 k 整除的连续子数组个数。
-// 输入：nums: number[], k: number
-// 输出：number
-// 约束：前缀和模 k + 哈希
-
-// 实现：
-
+function subarraysDivByK(nums, k) {
+    const map = new Map([[0, 1]]);
+    let sum = 0, count = 0;
+    for (const x of nums) {
+        sum = ((sum + x) % k + k) % k;
+        const c = map.get(sum) || 0;
+        count += c;
+        map.set(sum, c + 1);
+    }
+    return count;
+}
 
 // ==================== 7. 区间加法（差分） ====================
-// 题干：长度 length 的数组初始为 0，给定操作 [start, end, inc]，对 [start,end] 加 inc。求最终数组。
-// 输入：length: number, updates: number[][]
-// 输出：number[]
-// 约束：差分数组
-
-// 实现：
-
+function getModifiedArray(length, updates) {
+    const diff = Array(length + 1).fill(0);
+    for (const [start, end, inc] of updates) {
+        diff[start] += inc;
+        diff[end + 1] -= inc;
+    }
+    const res = [];
+    let cur = 0;
+    for (let i = 0; i < length; i++) res.push(cur += diff[i]);
+    return res;
+}
 
 // ==================== 8. 航班预订统计 ====================
-// 题干：n 个航班，bookings[i]=[first,last,seats]。求每个航班预订座位总数。
-// 输入：n: number, bookings: number[][]
-// 输出：number[]
-// 约束：差分
-
-// 实现：
-
+function corpFlightBookings(bookings, n) {
+    const diff = Array(n + 1).fill(0);
+    for (const [first, last, seats] of bookings) {
+        diff[first - 1] += seats;
+        diff[last] -= seats;
+    }
+    const res = [];
+    let cur = 0;
+    for (let i = 0; i < n; i++) res.push(cur += diff[i]);
+    return res;
+}
 
 // ==================== 9. 拼车 ====================
-// 题干：capacity 容量，trips[i]=[numPassengers, from, to]。判断能否完成所有行程。
-// 输入：trips: number[][], capacity: number
-// 输出：boolean
-// 约束：差分或按站点排序模拟
-
-// 实现：
-
+function carPooling(trips, capacity) {
+    const diff = Array(1001).fill(0);
+    for (const [num, from, to] of trips) {
+        diff[from] += num;
+        diff[to] -= num;
+    }
+    let cur = 0;
+    for (const d of diff) {
+        cur += d;
+        if (cur > capacity) return false;
+    }
+    return true;
+}
 
 // ==================== 10. 矩阵块和 ====================
-// 题干：二维矩阵，多次查询 (r1,c1) 到 (r2,c2) 的和。
-// 输入：matrix: number[][], 查询列表
-// 输出：number[]
-// 约束：二维前缀和
-
-// 实现：
-
+function matrixBlockSum(matrix, queries) {
+    const m = matrix.length, n = matrix[0].length;
+    const pre = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++)
+            pre[i + 1][j + 1] = matrix[i][j] + pre[i][j + 1] + pre[i + 1][j] - pre[i][j];
+    const sumRegion = (r1, c1, r2, c2) =>
+        pre[r2 + 1][c2 + 1] - pre[r1][c2 + 1] - pre[r2 + 1][c1] + pre[r1][c1];
+    return queries.map(([r1, c1, r2, c2]) => sumRegion(r1, c1, r2, c2));
+}
 
 // ==================== 11. 最大子矩阵 ====================
-// 题干：二维矩阵，求元素和最大的子矩阵。
-// 输入：matrix: number[][]
-// 输出：number
-// 约束：枚举行区间 + 列方向 Kadane
-
-// 实现：
-
+function maxSubmatrixSum(matrix) {
+    const m = matrix.length, n = matrix[0].length;
+    let res = -Infinity;
+    for (let r1 = 0; r1 < m; r1++) {
+        const rowSum = Array(n).fill(0);
+        for (let r2 = r1; r2 < m; r2++) {
+            for (let j = 0; j < n; j++) rowSum[j] += matrix[r2][j];
+            let cur = 0;
+            for (const x of rowSum) {
+                cur = Math.max(x, cur + x);
+                res = Math.max(res, cur);
+            }
+        }
+    }
+    return res;
+}
 
 // ==================== 12. 元素和为目标值的子矩阵数量 ====================
-// 题干：二维矩阵和 target，求和为 target 的子矩阵个数。
-// 输入：matrix: number[][], target: number
-// 输出：number
-// 约束：枚举行区间 + 列前缀和 + 哈希
-
-// 实现：
-
+function numSubmatrixSumTarget(matrix, target) {
+    const m = matrix.length, n = matrix[0].length;
+    let count = 0;
+    for (let r1 = 0; r1 < m; r1++) {
+        const rowSum = Array(n).fill(0);
+        for (let r2 = r1; r2 < m; r2++) {
+            for (let j = 0; j < n; j++) rowSum[j] += matrix[r2][j];
+            const map = new Map([[0, 1]]);
+            let sum = 0;
+            for (const x of rowSum) {
+                sum += x;
+                count += map.get(sum - target) || 0;
+                map.set(sum, (map.get(sum) || 0) + 1);
+            }
+        }
+    }
+    return count;
+}
 
 // ==================== 13. 矩形区域不超过 K 的最大数值和 ====================
-// 题干：二维矩阵和 k，求子矩阵和不超过 k 的最大值。
-// 输入：matrix: number[][], k: number
-// 输出：number
-// 约束：枚举行 + 列前缀和 + 有序集合/二分
-
-// 实现：
-
+function maxSumSubmatrix(matrix, k) {
+    const m = matrix.length, n = matrix[0].length;
+    let res = -Infinity;
+    for (let r1 = 0; r1 < m; r1++) {
+        const rowSum = Array(n).fill(0);
+        for (let r2 = r1; r2 < m; r2++) {
+            for (let j = 0; j < n; j++) rowSum[j] += matrix[r2][j];
+            const pre = [0];
+            for (const x of rowSum) pre.push(pre[pre.length - 1] + x);
+            for (let c1 = 0; c1 < pre.length; c1++)
+                for (let c2 = c1 + 1; c2 < pre.length; c2++) {
+                    const sum = pre[c2] - pre[c1];
+                    if (sum <= k) res = Math.max(res, sum);
+                }
+        }
+    }
+    return res;
+}
 
 // ==================== 14. 定长子串中元音最大数目 ====================
-// 题干：字符串 s 和 k，求长度为 k 的子串中元音字母最多个数。
-// 输入：s: string, k: number
-// 输出：number
-// 约束：定长滑动窗口或前缀和
-
-// 实现：
-
+const VOWELS = new Set('aeiouAEIOU');
+function maxVowels(s, k) {
+    let cur = 0;
+    for (let i = 0; i < k; i++) if (VOWELS.has(s[i])) cur++;
+    let max = cur;
+    for (let i = k; i < s.length; i++) {
+        if (VOWELS.has(s[i])) cur++;
+        if (VOWELS.has(s[i - k])) cur--;
+        max = Math.max(max, cur);
+    }
+    return max;
+}
 
 // ==================== 15. 每个元音包含偶数次的最长子串 ====================
-// 题干：字符串只含元音，求每个元音出现次数均为偶数的最长子串长度。
-// 输入：s: string
-// 输出：number
-// 约束：状态压缩（5 位） + 前缀异或 + 哈希
-
-// 实现：
-
+function findTheLongestSubstring(s) {
+    const map = new Map([[0, -1]]);
+    const idx = (c) => 'aeiou'.indexOf(c);
+    let state = 0, maxLen = 0;
+    for (let i = 0; i < s.length; i++) {
+        const j = idx(s[i]);
+        if (j >= 0) state ^= 1 << j;
+        if (map.has(state)) maxLen = Math.max(maxLen, i - map.get(state));
+        else map.set(state, i);
+    }
+    return maxLen;
+}
 
 // ==================== 16. 统计「优美子数组」 ====================
-// 题干：数组 nums 和 k，求恰好含 k 个奇数的子数组个数。
-// 输入：nums: number[], k: number
-// 输出：number
-// 约束：前缀奇数个数 + 哈希 或 滑动窗口
+function numberOfSubarrays(nums, k) {
+    const map = new Map([[0, 1]]);
+    let odd = 0, count = 0;
+    for (const x of nums) {
+        odd += x % 2;
+        count += map.get(odd - k) || 0;
+        map.set(odd, (map.get(odd) || 0) + 1);
+    }
+    return count;
+}
 
-// 实现：
-
-
-// ==================== 17. 和可被 K 整除的子数组（同题 6 换表述） ====================
-// 题干：同 022601 第 6 题。
-// 实现：
-
+// ==================== 17. 和可被 K 整除的子数组 ====================
+// 同 subarraysDivByK
+const subarraysDivByK17 = subarraysDivByK;
 
 // ==================== 18. 连续子数组的最大和（前缀和视角） ====================
-// 题干：求连续子数组最大和。要求用前缀和思路实现。
-// 输入：nums: number[]
-// 输出：number
-// 约束：前缀和 + 维护前缀最小值
-
-// 实现：
-
+function maxSubArrayPrefix(nums) {
+    let pre = 0, minPre = 0, res = -Infinity;
+    for (const x of nums) {
+        pre += x;
+        res = Math.max(res, pre - minPre);
+        minPre = Math.min(minPre, pre);
+    }
+    return res;
+}
 
 // ==================== 19. 左右两边子数组和相等 ====================
-// 题干：求数组中心下标：左侧元素和等于右侧元素和。不存在返回 -1。
-// 输入：nums: number[]
-// 输出：number
-// 约束：前缀和或左右各扫一遍
-
-// 实现：
-
+function pivotIndex(nums) {
+    const total = nums.reduce((a, b) => a + b, 0);
+    let left = 0;
+    for (let i = 0; i < nums.length; i++) {
+        if (left === total - left - nums[i]) return i;
+        left += nums[i];
+    }
+    return -1;
+}
 
 // ==================== 20. 形成两个异或相等数组的三元组数目 ====================
-// 题干：数组 arr，求满足 a==b 的三元组 (i,j,k) 个数，其中 a=arr[i]^...^arr[j-1], b=arr[j]^...^arr[k]。
-// 输入：arr: number[]
-// 输出：number
-// 约束：前缀异或 + 枚举 j
+function countTriplets(arr) {
+    const n = arr.length;
+    const xor = Array(n + 1).fill(0);
+    for (let i = 0; i < n; i++) xor[i + 1] = xor[i] ^ arr[i];
+    let count = 0;
+    for (let j = 1; j < n; j++)
+        for (let i = 0; i < j; i++)
+            for (let k = j; k < n; k++)
+                if ((xor[j] ^ xor[i]) === (xor[k + 1] ^ xor[j])) count++;
+    return count;
+}
 
-// 实现：
+// ==================== 测试 ====================
+function test022601() {
+    const assert = (name, got, expect) => {
+        const ok = JSON.stringify(got) === JSON.stringify(expect);
+        console.log(ok ? `[OK] ${name}` : `[FAIL] ${name} got=${JSON.stringify(got)} expect=${JSON.stringify(expect)}`);
+    };
+    const na = new NumArray([-2, 0, 3, -5, 2, -1]);
+    assert('1. NumArray', na.sumRange(0, 2), 1);
+    const nm = new NumMatrix([[3, 0, 1], [5, 6, 3], [1, 2, 0]]);
+    assert('2. NumMatrix', nm.sumRegion(1, 1, 2, 2), 11);
+    assert('3. subarraySum', subarraySum([1, 1, 1], 2), 2);
+    assert('4. findMaxLength', findMaxLength([0, 1, 0]), 2);
+    assert('5. productExceptSelf', productExceptSelf([1, 2, 3, 4]), [24, 12, 8, 6]);
+    assert('6. subarraysDivByK', subarraysDivByK([4, 5, 0, -2, -3, 1], 5), 7);
+    assert('7. getModifiedArray', getModifiedArray(5, [[1, 3, 2], [2, 4, 3], [0, 2, -2]]), [-2, 0, 3, 5, 3]);
+    assert('8. corpFlightBookings', corpFlightBookings([[1, 2, 10], [2, 3, 20], [2, 5, 25]], 5), [10, 55, 45, 25, 25]);
+    assert('9. carPooling', carPooling([[2, 1, 5], [3, 3, 7]], 4), false);
+    assert('10. matrixBlockSum', matrixBlockSum([[1, 2], [3, 4]], [[0, 0, 1, 1]]), [10]);
+    assert('11. maxSubmatrixSum', maxSubmatrixSum([[1, 2], [-3, 4]]), 6);
+    assert('12. numSubmatrixSumTarget', numSubmatrixSumTarget([[0, 1, 0], [1, 1, 1], [0, 1, 0]], 0), 4);
+    assert('13. maxSumSubmatrix', maxSumSubmatrix([[1, 0, 1], [0, -2, 3]], 2), 2);
+    assert('14. maxVowels', maxVowels('abciiidef', 3), 3);
+    assert('15. findTheLongestSubstring', findTheLongestSubstring('eleetminicoworoep'), 13);
+    assert('16. numberOfSubarrays', numberOfSubarrays([1, 1, 2, 1, 1], 3), 2);
+    assert('17. subarraysDivByK17', subarraysDivByK17([4, 5, 0, -2, -3, 1], 5), 7);
+    assert('18. maxSubArrayPrefix', maxSubArrayPrefix([-2, 1, -3, 4, -1, 2, 1, -5, 4]), 6);
+    assert('19. pivotIndex', pivotIndex([1, 7, 3, 6, 5, 6]), 3);
+    assert('20. countTriplets', countTriplets([2, 3, 1, 6, 7]), 4);
+    console.log('022601 tests done.');
+}
+test022601();

@@ -7,180 +7,351 @@ class ListNode { constructor(val, next = null) { this.val = val; this.next = nex
 class TreeNode { constructor(val, left = null, right = null) { this.val = val; this.left = left; this.right = right; } }
 
 // ==================== 1. 二叉树的右视图 ====================
-// 题干：给定根节点，返回从右侧能看到的节点值（每层最右节点）。
-// 输入：root: TreeNode | null
-// 输出：number[]
-// 约束：BFS 每层取最后一个 或 DFS 先右后左
-
-// 实现：
-
+function rightSideView(root) {
+    if (!root) return [];
+    const res = [], q = [root];
+    while (q.length) {
+        const len = q.length;
+        res.push(q[len - 1].val);
+        for (let i = 0; i < len; i++) {
+            const n = q.shift();
+            if (n.left) q.push(n.left);
+            if (n.right) q.push(n.right);
+        }
+    }
+    return res;
+}
 
 // ==================== 2. 二叉树的左视图 ====================
-// 题干：返回每层最左节点值。
-// 输入：root: TreeNode | null
-// 输出：number[]
-// 约束：BFS 或 DFS
-
-// 实现：
-
+function leftSideView(root) {
+    if (!root) return [];
+    const res = [], q = [root];
+    while (q.length) {
+        res.push(q[0].val);
+        const len = q.length;
+        for (let i = 0; i < len; i++) {
+            const n = q.shift();
+            if (n.left) q.push(n.left);
+            if (n.right) q.push(n.right);
+        }
+    }
+    return res;
+}
 
 // ==================== 3. 二叉树的序列化与反序列化 ====================
-// 题干：将二叉树序列化为字符串，并能反序列化回树。
-// 输入：root 或 data: string
-// 输出：string 或 TreeNode
-// 约束：前序/层序等，需表示空节点
-
-// 实现：
-
+function serialize(root) {
+    if (!root) return 'null';
+    return root.val + ',' + serialize(root.left) + ',' + serialize(root.right);
+}
+function deserialize(data) {
+    const arr = data.split(',');
+    let i = 0;
+    function build() {
+        const v = arr[i++];
+        if (v === 'null' || v === undefined) return null;
+        return new TreeNode(+v, build(), build());
+    }
+    return build();
+}
 
 // ==================== 4. 二叉搜索树序列化 ====================
-// 题干：BST 序列化与反序列化（可利用 BST 性质压缩）。
-// 输入：root 或 data
-// 输出：string 或 TreeNode
-// 约束：前序 + 上下界恢复
-
-// 实现：
-
+function serializeBST(root) {
+    return serialize(root);
+}
+function deserializeBST(data) {
+    const arr = data.split(',');
+    let i = 0;
+    function build(lo, hi) {
+        if (i >= arr.length) return null;
+        const v = arr[i];
+        if (v === 'null' || v === undefined) return null;
+        const val = +v;
+        if (val < lo || val > hi) return null;
+        i++;
+        return new TreeNode(val, build(lo, val), build(val, hi));
+    }
+    return build(-Infinity, Infinity);
+}
 
 // ==================== 5. 完全二叉树的节点个数 ====================
-// 题干：完全二叉树根节点，求节点个数。要求低于 O(n)。
-// 输入：root: TreeNode | null
-// 输出：number
-// 约束：利用完全二叉树性质，递归计算左右子树高度
-
-// 实现：
-
+function countNodes(root) {
+    if (!root) return 0;
+    let lh = 0, rh = 0;
+    for (let p = root; p; p = p.left) lh++;
+    for (let p = root; p; p = p.right) rh++;
+    if (lh === rh) return (1 << lh) - 1;
+    return 1 + countNodes(root.left) + countNodes(root.right);
+}
 
 // ==================== 6. 二叉树的完全性检验 ====================
-// 题干：判断二叉树是否完全二叉树（层序中无空档）。
-// 输入：root: TreeNode | null
-// 输出：boolean
-// 约束：BFS，遇 null 后不得再出现非 null
-
-// 实现：
-
+function isCompleteTree(root) {
+    const q = [root];
+    let seenNull = false;
+    while (q.length) {
+        const n = q.shift();
+        if (!n) { seenNull = true; continue; }
+        if (seenNull) return false;
+        q.push(n.left, n.right);
+    }
+    return true;
+}
 
 // ==================== 7. 在二叉树中增加一行 ====================
-// 题干：在深度为 depth 的那一层左侧插入一行节点，值为 val。
-// 输入：root: TreeNode | null, val: number, depth: number
-// 输出：TreeNode | null
-// 约束：BFS/DFS 到 depth-1 层后插入
-
-// 实现：
-
+function addOneRow(root, val, depth) {
+    if (depth === 1) return new TreeNode(val, root, null);
+    const q = [root];
+    let d = 1;
+    while (q.length) {
+        const len = q.length;
+        if (d === depth - 1) {
+            for (let i = 0; i < len; i++) {
+                const n = q.shift();
+                n.left = new TreeNode(val, n.left, null);
+                n.right = new TreeNode(val, null, n.right);
+            }
+            break;
+        }
+        for (let i = 0; i < len; i++) {
+            const n = q.shift();
+            if (n.left) q.push(n.left);
+            if (n.right) q.push(n.right);
+        }
+        d++;
+    }
+    return root;
+}
 
 // ==================== 8. 找树左下角的值 ====================
-// 题干：求二叉树最后一层最左边的节点值。
-// 输入：root: TreeNode | null
-// 输出：number
-// 约束：BFS 每层第一个 或 DFS 先左后右记录深度最大首次
-
-// 实现：
-
+function findBottomLeftValue(root) {
+    const q = [root];
+    let first = root.val;
+    while (q.length) {
+        const len = q.length;
+        first = q[0].val;
+        for (let i = 0; i < len; i++) {
+            const n = q.shift();
+            if (n.left) q.push(n.left);
+            if (n.right) q.push(n.right);
+        }
+    }
+    return first;
+}
 
 // ==================== 9. 二叉树的边界 ====================
-// 题干：按逆时针顺序返回边界：左边界、叶子、右边界（不含根重复）。
-// 输入：root: TreeNode | null
-// 输出：number[]
-// 约束：分三步：左边界、叶子、右边界
-
-// 实现：
-
+function boundaryOfBinaryTree(root) {
+    if (!root) return [];
+    const left = [], leaves = [], right = [];
+    function leftBound(node) {
+        if (!node || (!node.left && !node.right)) return;
+        left.push(node.val);
+        leftBound(node.left || node.right);
+    }
+    function collectLeaves(node) {
+        if (!node) return;
+        if (!node.left && !node.right) leaves.push(node.val);
+        collectLeaves(node.left);
+        collectLeaves(node.right);
+    }
+    function rightBound(node) {
+        if (!node || (!node.left && !node.right)) return;
+        right.push(node.val);
+        rightBound(node.right || node.left);
+    }
+    leftBound(root.left);
+    if (root.left || root.right) collectLeaves(root);
+    else leaves.push(root.val);
+    rightBound(root.right);
+    return [root.val, ...left, ...(root.left || root.right ? leaves : []), ...right.reverse()];
+}
 
 // ==================== 10. 二叉搜索树迭代器 ====================
-// 题干：实现 BST 的 next() 与 hasNext()，均摊 O(1)。
-// 输入：root
-// 输出：按调用返回
-// 约束：栈模拟中序，控制栈大小 O(h)
-
-// 实现：
-
+class BSTIterator {
+    constructor(root) {
+        this.stack = [];
+        this.pushLeft(root);
+    }
+    pushLeft(node) {
+        while (node) { this.stack.push(node); node = node.left; }
+    }
+    next() {
+        const n = this.stack.pop();
+        this.pushLeft(n.right);
+        return n.val;
+    }
+    hasNext() {
+        return this.stack.length > 0;
+    }
+}
 
 // ==================== 11. 恢复二叉搜索树 ====================
-// 题干：BST 中恰好两个节点被交换，恢复这棵 BST。O(1) 空间。
-// 输入：root: TreeNode | null
-// 输出：无（原地）
-// 约束：Morris 中序找逆序对
-
-// 实现：
-
+function recoverTree(root) {
+    let x = null, y = null, prev = null;
+    function dfs(node) {
+        if (!node) return;
+        dfs(node.left);
+        if (prev && prev.val > node.val) {
+            y = node;
+            if (!x) x = prev;
+        }
+        prev = node;
+        dfs(node.right);
+    }
+    dfs(root);
+    if (x && y) [x.val, y.val] = [y.val, x.val];
+}
 
 // ==================== 12. 二叉搜索树中的众数 ====================
-// 题干：含重复值的 BST，求出现次数最多的元素（可能多个）。
-// 输入：root: TreeNode | null
-// 输出：number[]
-// 约束：中序 + 比较当前计数与 maxCount
-
-// 实现：
-
+function findMode(root) {
+    let maxCount = 0, curCount = 0, prev = null, res = [];
+    function inorder(node) {
+        if (!node) return;
+        inorder(node.left);
+        if (prev === null || prev !== node.val) curCount = 1;
+        else curCount++;
+        prev = node.val;
+        if (curCount > maxCount) { maxCount = curCount; res = [node.val]; }
+        else if (curCount === maxCount) res.push(node.val);
+        inorder(node.right);
+    }
+    inorder(root);
+    return res;
+}
 
 // ==================== 13. 把二叉搜索树转换为累加树 ====================
-// 题干：BST 转为累加树：每个节点值变为原树中大于等于该节点值之和。
-// 输入：root: TreeNode | null
-// 输出：TreeNode | null
-// 约束：反序中序（右-根-左）累加
-
-// 实现：
-
+function convertBST(root) {
+    let sum = 0;
+    function revInorder(node) {
+        if (!node) return;
+        revInorder(node.right);
+        sum += node.val;
+        node.val = sum;
+        revInorder(node.left);
+    }
+    revInorder(root);
+    return root;
+}
 
 // ==================== 14. 二叉搜索树的范围和 ====================
-// 题干：BST 中节点值在 [low, high] 范围内的和。
-// 输入：root: TreeNode | null, low: number, high: number
-// 输出：number
-// 约束：递归剪枝
-
-// 实现：
-
+function rangeSumBST(root, low, high) {
+    if (!root) return 0;
+    if (root.val < low) return rangeSumBST(root.right, low, high);
+    if (root.val > high) return rangeSumBST(root.left, low, high);
+    return root.val + rangeSumBST(root.left, low, high) + rangeSumBST(root.right, low, high);
+}
 
 // ==================== 15. 修剪二叉搜索树 ====================
-// 题干：BST 和 [low, high]，删除不在范围内的节点。
-// 输入：root: TreeNode | null, low: number, high: number
-// 输出：TreeNode | null
-// 约束：递归，当前节点决定保留哪侧子树
-
-// 实现：
-
+function trimBST(root, low, high) {
+    if (!root) return null;
+    if (root.val < low) return trimBST(root.right, low, high);
+    if (root.val > high) return trimBST(root.left, low, high);
+    root.left = trimBST(root.left, low, high);
+    root.right = trimBST(root.right, low, high);
+    return root;
+}
 
 // ==================== 16. 删除二叉搜索树中的节点 ====================
-// 题干：在 BST 中删除值为 key 的节点。
-// 输入：root: TreeNode | null, key: number
-// 输出：TreeNode | null
-// 约束：无子/单子/双子（用后继或前驱替换）
-
-// 实现：
-
+function deleteNode(root, key) {
+    if (!root) return null;
+    if (key < root.val) { root.left = deleteNode(root.left, key); return root; }
+    if (key > root.val) { root.right = deleteNode(root.right, key); return root; }
+    if (!root.left) return root.right;
+    if (!root.right) return root.left;
+    let p = root.right;
+    while (p.left) p = p.left;
+    root.val = p.val;
+    root.right = deleteNode(root.right, p.val);
+    return root;
+}
 
 // ==================== 17. 二叉搜索树中的插入操作 ====================
-// 题干：在 BST 中插入值 val，保持 BST 性质。
-// 输入：root: TreeNode | null, val: number
-// 输出：TreeNode | null
-// 约束：递归找到空位插入
-
-// 实现：
-
+function insertIntoBST(root, val) {
+    if (!root) return new TreeNode(val);
+    if (val < root.val) root.left = insertIntoBST(root.left, val);
+    else root.right = insertIntoBST(root.right, val);
+    return root;
+}
 
 // ==================== 18. 后继者 ====================
-// 题干：BST 和节点 p，求 p 的中序后继。
-// 输入：root: TreeNode | null, p: TreeNode
-// 输出：TreeNode | null
-// 约束：有右子树则右子树最左；否则向上找第一个是左儿子的祖先
-
-// 实现：
-
+function inorderSuccessor(root, p) {
+    let succ = null;
+    while (root) {
+        if (p.val < root.val) { succ = root; root = root.left; }
+        else root = root.right;
+    }
+    return succ;
+}
 
 // ==================== 19. 从先序遍历还原二叉树 ====================
-// 题干：先序遍历带深度信息（用短横线数量表示深度），还原二叉树。
-// 输入：traversal: string（如 "1-2--3--4-5--6--7"）
-// 输出：TreeNode | null
-// 约束：栈维护当前路径，按深度接在对应父节点下
-
-// 实现：
-
+function recoverFromPreorder(traversal) {
+    const stack = [];
+    let i = 0;
+    while (i < traversal.length) {
+        let d = 0;
+        while (traversal[i] === '-') { d++; i++; }
+        let num = '';
+        while (i < traversal.length && traversal[i] !== '-') num += traversal[i++];
+        const node = new TreeNode(+num);
+        while (stack.length > d) stack.pop();
+        if (stack.length) {
+            if (!stack[stack.length - 1].left) stack[stack.length - 1].left = node;
+            else stack[stack.length - 1].right = node;
+        }
+        stack.push(node);
+    }
+    return stack[0] || null;
+}
 
 // ==================== 20. 二叉树的垂序遍历 ====================
-// 题干：按 (列, 行) 坐标对节点分组，同列同行按值升序，返回从左到右每列的结果。
-// 输入：root: TreeNode | null
-// 输出：number[][]
-// 约束：DFS 记录 (col, row, val)，再按 col、row、val 排序
+function verticalTraversal(root) {
+    const nodes = [];
+    function dfs(node, col, row) {
+        if (!node) return;
+        nodes.push([col, row, node.val]);
+        dfs(node.left, col - 1, row + 1);
+        dfs(node.right, col + 1, row + 1);
+    }
+    dfs(root, 0, 0);
+    nodes.sort((a, b) => a[0] !== b[0] ? a[0] - b[0] : a[1] !== b[1] ? a[1] - b[1] : a[2] - b[2]);
+    const res = [];
+    let prevCol = null;
+    for (const [col, , val] of nodes) {
+        if (col !== prevCol) res.push([]);
+        res[res.length - 1].push(val);
+        prevCol = col;
+    }
+    return res;
+}
 
-// 实现：
+// ==================== 测试 ====================
+function test022801() {
+    const assert = (name, got, expect) => {
+        const ok = JSON.stringify(got) === JSON.stringify(expect);
+        console.log(ok ? `[OK] ${name}` : `[FAIL] ${name} got=${JSON.stringify(got)} expect=${JSON.stringify(expect)}`);
+    };
+    const r1 = new TreeNode(1, new TreeNode(2, null, new TreeNode(5)), new TreeNode(3, null, new TreeNode(4)));
+    assert('1. rightSideView', rightSideView(r1), [1, 3, 4]);
+    const r2 = new TreeNode(1, new TreeNode(2, new TreeNode(4)), new TreeNode(3));
+    assert('2. leftSideView', leftSideView(r2), [1, 2, 4]);
+    const r3 = new TreeNode(1, new TreeNode(2), new TreeNode(3));
+    assert('3. serialize', serialize(r3), '1,2,null,null,3,null,null');
+    const r3b = deserialize('1,2,null,null,3,null,null');
+    assert('3. deserialize', r3b && r3b.val === 1 && r3b.left.val === 2 && r3b.right.val === 3, true);
+    const r5 = new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3, new TreeNode(6), null));
+    assert('5. countNodes', countNodes(r5), 6);
+    const r6 = new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3, new TreeNode(6), null));
+    assert('6. isCompleteTree', isCompleteTree(r6), true);
+    const r8 = new TreeNode(2, new TreeNode(1), new TreeNode(3));
+    assert('8. findBottomLeftValue', findBottomLeftValue(r8), 1);
+    const r10 = new TreeNode(7, new TreeNode(3), new TreeNode(15, new TreeNode(9), new TreeNode(20)));
+    const it = new BSTIterator(r10);
+    const nexts = [it.next(), it.next(), it.hasNext(), it.next(), it.hasNext(), it.next(), it.hasNext()];
+    assert('10. BSTIterator', nexts, [3, 7, true, 9, true, 15, true]);
+    const r14 = new TreeNode(10, new TreeNode(5, new TreeNode(3), new TreeNode(7)), new TreeNode(15, null, new TreeNode(18)));
+    assert('14. rangeSumBST', rangeSumBST(r14, 7, 15), 32);
+    const r19 = recoverFromPreorder('1-2--3--4-5--6--7');
+    assert('19. recoverFromPreorder', r19 && r19.val === 1 && r19.left.val === 2 && r19.left.left.val === 3, true);
+    const r20 = new TreeNode(3, new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)));
+    assert('20. verticalTraversal', verticalTraversal(r20), [[9], [3, 15], [20], [7]]);
+    console.log('022801 tests done.');
+}
+test022801();
