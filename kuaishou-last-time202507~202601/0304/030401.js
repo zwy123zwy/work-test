@@ -1,204 +1,398 @@
 /**
- * 030401 面试题（20 道）- 专题：手写与场景综合
+ * 030401 面试算法题（20 道）- 专题：图与 BFS/DFS
  * 日期：2026-03-04
- * 类型：手写 API、场景题、设计、编码实现
  */
 
-// ==================== 1. 手写 apply / call ====================
-// 题干：实现 myCall(ctx, ...args) 和 myApply(ctx, args)，效果与 Function.prototype.call/apply 一致。
-// 输入：ctx, args
-// 输出：函数执行结果
-// 约束：考虑 ctx 为 null 时替代为 globalThis
+class ListNode { constructor(val, next = null) { this.val = val; this.next = next; } }
+class TreeNode { constructor(val, left = null, right = null) { this.val = val; this.left = left; this.right = right; } }
 
-// 实现：
-
-Function.prototype.myCall = function (ctx, ...args) {
-    const ctx = ctx || globalThis;
-    ctx.fn = this;
-    const result = ctx.fn(...args);
-    delete ctx.fn;
-    return result;
+// ==================== 1. 岛屿数量 ====================
+function numIslands(grid) {
+    if (!grid.length) return 0;
+    const m = grid.length, n = grid[0].length;
+    const dfs = (i, j) => {
+        if (i < 0 || i >= m || j < 0 || j >= n || grid[i][j] !== '1') return;
+        grid[i][j] = '0';
+        dfs(i + 1, j); dfs(i - 1, j); dfs(i, j + 1); dfs(i, j - 1);
+    };
+    let count = 0;
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++)
+            if (grid[i][j] === '1') { dfs(i, j); count++; }
+    return count;
 }
 
-Function.prototype.myApply = function (ctx, args) {
-    const ctx = ctx || globalThis;
-    ctx.fn = this;
-    const result = ctx.fn(...args);
-    delete ctx.fn;
-    return result;
+// ==================== 2. 岛屿的最大面积 ====================
+function maxAreaOfIsland(grid) {
+    if (!grid.length) return 0;
+    const m = grid.length, n = grid[0].length;
+    const dfs = (i, j) => {
+        if (i < 0 || i >= m || j < 0 || j >= n || grid[i][j] !== 1) return 0;
+        grid[i][j] = 0;
+        return 1 + dfs(i + 1, j) + dfs(i - 1, j) + dfs(i, j + 1) + dfs(i, j - 1);
+    };
+    let max = 0;
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++)
+            if (grid[i][j] === 1) max = Math.max(max, dfs(i, j));
+    return max;
 }
 
-// ==================== 2. 手写 Object.create ====================
-// 题干：实现 myCreate(proto)，返回以 proto 为原型的空对象。
-// 输入：proto: object | null
-// 输出：object
-// 约束：不直接用 Object.create
-
-// 实现：
-
-function myCreate(proto) {
-    function F() {}
-    F.prototype = proto;
-    return new F();
+// ==================== 3. 被围绕的区域 ====================
+function solve(board) {
+    if (!board.length) return;
+    const m = board.length, n = board[0].length;
+    const dfs = (i, j) => {
+        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j] !== 'O') return;
+        board[i][j] = '#';
+        dfs(i + 1, j); dfs(i - 1, j); dfs(i, j + 1); dfs(i, j - 1);
+    };
+    for (let i = 0; i < m; i++) { dfs(i, 0); dfs(i, n - 1); }
+    for (let j = 0; j < n; j++) { dfs(0, j); dfs(m - 1, j); }
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++) {
+            if (board[i][j] === '#') board[i][j] = 'O';
+            else if (board[i][j] === 'O') board[i][j] = 'X';
+        }
 }
 
-// ==================== 3. 手写 JSON.stringify（简化版） ====================
-// 题干：实现简化版 stringify，支持 null、number、string、boolean、数组、纯对象（无循环引用）。
-// 输入：value: any
-// 输出：string
-// 约束：不处理 undefined、函数、Symbol、循环引用
+// ==================== 4. 克隆图 ====================
+function cloneGraph(node) {
+    if (!node) return null;
+    const map = new Map();
+    const dfs = (n) => {
+        if (map.has(n)) return map.get(n);
+        const copy = { val: n.val, neighbors: [] };
+        map.set(n, copy);
+        for (const nb of n.neighbors) copy.neighbors.push(dfs(nb));
+        return copy;
+    };
+    return dfs(node);
+}
 
-// 实现：
+// ==================== 5. 课程表 ====================
+function canFinish(numCourses, prerequisites) {
+    const ind = Array(numCourses).fill(0);
+    const g = Array(numCourses).fill(0).map(() => []);
+    for (const [a, b] of prerequisites) { g[b].push(a); ind[a]++; }
+    const q = [];
+    for (let i = 0; i < numCourses; i++) if (ind[i] === 0) q.push(i);
+    let count = 0;
+    while (q.length) {
+        const u = q.shift();
+        count++;
+        for (const v of g[u]) if (--ind[v] === 0) q.push(v);
+    }
+    return count === numCourses;
+}
 
+// ==================== 6. 课程表 II ====================
+function findOrder(numCourses, prerequisites) {
+    const ind = Array(numCourses).fill(0);
+    const g = Array(numCourses).fill(0).map(() => []);
+    for (const [a, b] of prerequisites) { g[b].push(a); ind[a]++; }
+    const q = [];
+    for (let i = 0; i < numCourses; i++) if (ind[i] === 0) q.push(i);
+    const res = [];
+    while (q.length) {
+        const u = q.shift();
+        res.push(u);
+        for (const v of g[u]) if (--ind[v] === 0) q.push(v);
+    }
+    return res.length === numCourses ? res : [];
+}
 
-// ==================== 4. 手写 LRU Cache ====================
-// 题干：实现 LRU 缓存，get(key)、put(key, value)，容量满时淘汰最久未用。O(1) 读写。
-// 输入：capacity: number
-// 输出：{ get, put }
-// 约束：Map 或 哈希表+双向链表
+// ==================== 7. 省份数量 ====================
+function findCircleNum(isConnected) {
+    const n = isConnected.length;
+    const vis = new Set();
+    const dfs = (i) => {
+        vis.add(i);
+        for (let j = 0; j < n; j++) if (isConnected[i][j] && !vis.has(j)) dfs(j);
+    };
+    let count = 0;
+    for (let i = 0; i < n; i++) if (!vis.has(i)) { dfs(i); count++; }
+    return count;
+}
 
-// 实现：
+// ==================== 8. 冗余连接 ====================
+function findRedundantConnection(edges) {
+    const parent = Array(edges.length + 1).fill(0).map((_, i) => i);
+    const find = (x) => (parent[x] === x ? x : (parent[x] = find(parent[x])));
+    const union = (a, b) => { const pa = find(a), pb = find(b); if (pa === pb) return false; parent[pa] = pb; return true; };
+    for (const [a, b] of edges) if (!union(a, b)) return [a, b];
+    return [];
+}
 
+// ==================== 9. 单词接龙 ====================
+function ladderLength(beginWord, endWord, wordList) {
+    const set = new Set(wordList);
+    if (!set.has(endWord)) return 0;
+    let q = [beginWord], step = 1;
+    while (q.length) {
+        const next = [];
+        for (const w of q) {
+            if (w === endWord) return step;
+            for (let i = 0; i < w.length; i++)
+                for (let c = 97; c <= 122; c++) {
+                    const nw = w.slice(0, i) + String.fromCharCode(c) + w.slice(i + 1);
+                    if (set.has(nw)) { set.delete(nw); next.push(nw); }
+                }
+        }
+        q = next;
+        step++;
+    }
+    return 0;
+}
 
-// ==================== 5. 手写 发布-订阅 与 观察者 区别 ====================
-// 题干：简述发布-订阅与观察者模式的区别；实现一个简单的 EventBus（on/off/emit/once）。
-// 输入：无
-// 输出：文字区别 + EventBus 代码
-// 约束：支持多事件
+// ==================== 10. 矩阵中的最长递增路径 ====================
+function longestIncreasingPath(matrix) {
+    if (!matrix.length) return 0;
+    const m = matrix.length, n = matrix[0].length;
+    const memo = Array(m).fill(0).map(() => Array(n).fill(0));
+    const dfs = (i, j, prev) => {
+        if (i < 0 || i >= m || j < 0 || j >= n || matrix[i][j] <= prev) return 0;
+        if (memo[i][j]) return memo[i][j];
+        const v = matrix[i][j];
+        memo[i][j] = 1 + Math.max(dfs(i + 1, j, v), dfs(i - 1, j, v), dfs(i, j + 1, v), dfs(i, j - 1, v));
+        return memo[i][j];
+    };
+    let max = 0;
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++) max = Math.max(max, dfs(i, j, -Infinity));
+    return max;
+}
 
-// 实现：
+// ==================== 11. 判断二分图 ====================
+function isBipartite(graph) {
+    const color = {};
+    const dfs = (u, c) => {
+        if (color[u] !== undefined) return color[u] === c;
+        color[u] = c;
+        for (const v of graph[u]) if (!dfs(v, 1 - c)) return false;
+        return true;
+    };
+    for (let i = 0; i < graph.length; i++) if (color[i] === undefined && !dfs(i, 0)) return false;
+    return true;
+}
 
+// ==================== 12. 太平洋大西洋水流问题 ====================
+function pacificAtlantic(heights) {
+    if (!heights.length) return [];
+    const m = heights.length, n = heights[0].length;
+    const pac = new Set(), atl = new Set();
+    const dfs = (i, j, set) => {
+        const key = i + ',' + j;
+        if (set.has(key)) return;
+        set.add(key);
+        for (const [di, dj] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+            const ni = i + di, nj = j + dj;
+            if (ni >= 0 && ni < m && nj >= 0 && nj < n && heights[ni][nj] >= heights[i][j]) dfs(ni, nj, set);
+        }
+    };
+    for (let i = 0; i < m; i++) { dfs(i, 0, pac); dfs(i, n - 1, atl); }
+    for (let j = 0; j < n; j++) { dfs(0, j, pac); dfs(m - 1, j, atl); }
+    const res = [];
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++)
+            if (pac.has(i + ',' + j) && atl.has(i + ',' + j)) res.push([i, j]);
+    return res;
+}
 
-// ==================== 6. 场景：请求重试 ====================
-// 题干：实现 requestWithRetry(fn, maxRetry)，请求失败时最多重试 maxRetry 次，每次间隔 1s 递增（1s、2s、3s）。
-// 输入：fn: () => Promise<T>, maxRetry: number
-// 输出：Promise<T>
-// 约束：只有失败才重试
+// ==================== 13. 腐烂的橘子 ====================
+function orangesRotting(grid) {
+    const m = grid.length, n = grid[0].length;
+    let q = [], fresh = 0;
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++) {
+            if (grid[i][j] === 2) q.push([i, j]);
+            else if (grid[i][j] === 1) fresh++;
+        }
+    let time = 0;
+    while (q.length && fresh) {
+        const next = [];
+        for (const [i, j] of q) {
+            for (const [di, dj] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+                const ni = i + di, nj = j + dj;
+                if (ni >= 0 && ni < m && nj >= 0 && nj < n && grid[ni][nj] === 1) {
+                    grid[ni][nj] = 2;
+                    fresh--;
+                    next.push([ni, nj]);
+                }
+            }
+        }
+        q = next;
+        time++;
+    }
+    return fresh ? -1 : time;
+}
 
-// 实现：
+// ==================== 14. 蛇与梯子 ====================
+function snakesAndLadders(board) {
+    const n = board.length;
+    const get = (s) => {
+        const row = n - 1 - ((s - 1) / n) | 0;
+        const col = (s - 1) % n;
+        const c = (row + n) % 2 === 0 ? col : n - 1 - col;
+        return board[row][c] === -1 ? s : board[row][c];
+    };
+    const vis = new Set([1]);
+    let q = [1], step = 0;
+    while (q.length) {
+        const next = [];
+        for (const cur of q) {
+            if (cur === n * n) return step;
+            for (let d = 1; d <= 6 && cur + d <= n * n; d++) {
+                const nxt = get(cur + d);
+                if (!vis.has(nxt)) { vis.add(nxt); next.push(nxt); }
+            }
+        }
+        q = next;
+        step++;
+    }
+    return -1;
+}
 
+// ==================== 15. 打开转盘锁 ====================
+function openLock(deadends, target) {
+    const dead = new Set(deadends);
+    if (dead.has('0000')) return -1;
+    let q = ['0000'], vis = new Set(['0000']), step = 0;
+    while (q.length) {
+        const next = [];
+        for (const cur of q) {
+            if (cur === target) return step;
+            for (let i = 0; i < 4; i++) {
+                for (const d of [1, -1]) {
+                    const digit = (parseInt(cur[i], 10) + d + 10) % 10;
+                    const nw = cur.slice(0, i) + digit + cur.slice(i + 1);
+                    if (!dead.has(nw) && !vis.has(nw)) { vis.add(nw); next.push(nw); }
+                }
+            }
+        }
+        q = next;
+        step++;
+    }
+    return -1;
+}
 
-// ==================== 7. 场景：接口请求缓存 ====================
-// 题干：相同参数的请求在同一时刻只发一次，后续拿到同一 Promise；请求完成后缓存结果，相同参数在 T 秒内直接返回缓存。
-// 输入：requestFn: (params) => Promise<T>, ttl?: number
-// 输出：包装后的请求函数
-// 约束：并发同一 key 共用一个 Promise
+// ==================== 16. 完全平方数（BFS 最短路） ====================
+function numSquares(n) {
+    let q = [n], step = 0, vis = new Set([n]);
+    while (q.length) {
+        const next = [];
+        for (const cur of q) {
+            if (cur === 0) return step;
+            for (let i = 1; i * i <= cur; i++) {
+                const rest = cur - i * i;
+                if (!vis.has(rest)) { vis.add(rest); next.push(rest); }
+            }
+        }
+        q = next;
+        step++;
+    }
+    return -1;
+}
 
-// 实现：
+// ==================== 17. 最小基因变化 ====================
+function minMutation(start, end, bank) {
+    const set = new Set(bank);
+    if (!set.has(end)) return -1;
+    const genes = ['A', 'C', 'G', 'T'];
+    let q = [start], step = 0;
+    set.delete(start);
+    while (q.length) {
+        const next = [];
+        for (const w of q) {
+            if (w === end) return step;
+            for (let i = 0; i < 8; i++)
+                for (const g of genes) {
+                    if (g === w[i]) continue;
+                    const nw = w.slice(0, i) + g + w.slice(i + 1);
+                    if (set.has(nw)) { set.delete(nw); next.push(nw); }
+                }
+        }
+        q = next;
+        step++;
+    }
+    return -1;
+}
 
+// ==================== 18. 网络延迟时间 ====================
+function networkDelayTime(times, n, k) {
+    const dist = Array(n + 1).fill(Infinity);
+    dist[k] = 0;
+    for (let i = 0; i < n; i++)
+        for (const [u, v, w] of times)
+            if (dist[u] !== Infinity && dist[u] + w < dist[v]) dist[v] = dist[u] + w;
+    let max = 0;
+    for (let i = 1; i <= n; i++) { if (dist[i] === Infinity) return -1; max = Math.max(max, dist[i]); }
+    return max;
+}
 
-// ==================== 8. 场景：排队执行 ====================
-// 题干：实现 QueueRunner，add(task) 将异步 task 加入队列，同一时间只执行一个，按序执行。
-// 输入：无
-// 输出：{ add: (task) => Promise<any> }
-// 约束：task 为 () => Promise<any>
+// ==================== 19. 重新规划路线 ====================
+function minReorder(n, connections) {
+    const g = Array(n).fill(0).map(() => []);
+    for (const [a, b] of connections) {
+        g[a].push([b, 1]);
+        g[b].push([a, 0]);
+    }
+    let count = 0;
+    const dfs = (u, parent) => {
+        for (const [v, dir] of g[u]) {
+            if (v === parent) continue;
+            count += dir;
+            dfs(v, u);
+        }
+    };
+    dfs(0, -1);
+    return count;
+}
 
-// 实现：
+// ==================== 20. 判断图中是否存在有效路径 ====================
+function hasValidPath(grid) {
+    const m = grid.length, n = grid[0].length;
+    const dirs = { 1: [[0, -1], [0, 1]], 2: [[-1, 0], [1, 0]], 3: [[0, -1], [1, 0]], 4: [[0, 1], [1, 0]], 5: [[0, -1], [-1, 0]], 6: [[0, 1], [-1, 0]] };
+    const opp = { '0,1': '0,-1', '0,-1': '0,1', '1,0': '-1,0', '-1,0': '1,0' };
+    const vis = new Set();
+    const dfs = (i, j) => {
+        if (i === m - 1 && j === n - 1) return true;
+        vis.add(i + ',' + j);
+        for (const [di, dj] of dirs[grid[i][j]] || []) {
+            const ni = i + di, nj = j + dj;
+            if (ni < 0 || ni >= m || nj < 0 || nj >= n || vis.has(ni + ',' + nj)) continue;
+            const nextDirs = dirs[grid[ni][nj]];
+            if (!nextDirs) continue;
+            const need = opp[di + ',' + dj] || (-di) + ',' + (-dj);
+            if (nextDirs.some(([a, b]) => a + ',' + b === need || (-a) + ',' + (-b) === need))
+                if (dfs(ni, nj)) return true;
+        }
+        return false;
+    };
+    return dfs(0, 0);
+}
 
-
-// ==================== 9. 手写 数组去重 ====================
-// 题干：实现数组去重，支持基本类型和对象（对象按引用去重）。至少两种：Set、reduce、Map。
-// 输入：arr: any[]
-// 输出：any[]
-// 约束：对象用 Map 存引用
-
-// 实现：
-
-
-// ==================== 10. 手写 数组乱序 ====================
-// 题干：实现 shuffle(arr)，等概率打乱数组。说明为什么 arr.sort(() => Math.random() - 0.5) 不均匀。
-// 输入：arr: any[]
-// 输出：any[]
-// 约束：Fisher-Yates 洗牌
-
-// 实现：
-
-
-// ==================== 11. 手写 继承（ES5 与 ES6） ====================
-// 题干：用 ES5 实现 Child 继承 Parent（组合继承或寄生组合）；用 ES6 class 写等价实现。
-// 输入：无
-// 输出：两段代码
-// 约束：避免重复继承属性、原型链正确
-
-// 实现：
-
-
-// ==================== 12. 手写 带取消的 Promise ====================
-// 题干：封装 createCancelablePromise(promise)，返回 { promise, cancel }，cancel 后 promise 永远 pending 或 reject。
-// 输入：promise: Promise<any>
-// 输出：{ promise, cancel }
-// 约束：cancel 可提前调用
-
-// 实现：
-
-
-// ==================== 13. 手写 链式调用 ====================
-// 题干：实现 Calculator，支持 new Calculator().add(1).add(2).multiply(3).result() 得到 9。
-// 输入：无
-// 输出：Calculator 类或对象
-// 约束：链式返回 this
-
-// 实现：
-
-
-// ==================== 14. 手写 千分位格式化 ====================
-// 题干：将数字格式化为千分位字符串，如 1234567.89 => "1,234,567.89"。
-// 输入：num: number
-// 输出：string
-// 约束：正则或循环
-
-// 实现：
-
-
-// ==================== 15. 手写 驼峰与下划线互转 ====================
-// 题干：camelToSnake('userName') => 'user_name'；snakeToCamel('user_name') => 'userName'。支持对象递归转换 key。
-// 输入：str 或 obj
-// 输出：string 或 object
-// 约束：递归一层层转 key
-
-// 实现：
-
-
-// ==================== 16. 手写 获取嵌套属性 ====================
-// 题干：实现 get(obj, path)，path 为 'a.b.c' 或 ['a','b','c']，取不到返回 undefined。
-// 输入：obj: object, path: string | string[]
-// 输出：any
-// 约束：避免抛错
-
-// 实现：
-
-
-// ==================== 17. 手写 深比较 ====================
-// 题干：实现 isEqual(a, b)，深度比较两个值是否相等。支持基本类型、数组、对象、Date、RegExp。
-// 输入：a: any, b: any
-// 输出：boolean
-// 约束：处理循环引用（可选）
-
-// 实现：
-
-
-// ==================== 18. 场景：批量请求与错误处理 ====================
-// 题干：给定多个请求 URL，并发请求，要求：全部成功返回结果数组；任意失败则整体失败，并返回第一个错误。不允许多个请求串行。
-// 输入：urls: string[]
-// 输出：Promise<results[]>
-// 约束：Promise.all 或手写聚合
-
-// 实现：
-
-
-// ==================== 19. 手写 简易 依赖收集（响应式思路） ====================
-// 题干：实现 reactive(obj)，返回代理对象；实现 effect(fn)，fn 内访问到的 reactive 属性变化时重新执行 fn。仅需支持一层属性。
-// 输入：obj: object, fn: Function
-// 输出：reactive 对象 + effect 注册
-// 约束：Proxy get/set + Set 收集 effect
-
-// 实现：
-
-
-// ==================== 20. 手写 单例模式 ====================
-// 题干：实现 getSingleton(Constructor)，使得多次调用 getSingleton(Foo) 返回同一实例。
-// 输入：Constructor: new (...args) => T
-// 输出：单例实例
-// 约束：可传参，仅首次 new 时使用参数
-
-// 实现：
+// ==================== 测试 ====================
+function test030401() {
+    const assert = (name, got, expect) => {
+        const ok = JSON.stringify(got) === JSON.stringify(expect);
+        console.log(ok ? `[OK] ${name}` : `[FAIL] ${name} got=${JSON.stringify(got)} expect=${JSON.stringify(expect)}`);
+    };
+    const g1 = [['1', '1', '1', '1', '0'], ['1', '1', '0', '1', '0'], ['1', '1', '0', '0', '0'], ['0', '0', '0', '0', '0']];
+    assert('1. numIslands', numIslands(g1), 1);
+    const g2 = [[1, 1, 0, 0, 0], [1, 1, 0, 0, 0], [0, 0, 0, 1, 1], [0, 0, 0, 1, 1]];
+    assert('2. maxAreaOfIsland', maxAreaOfIsland(g2), 4);
+    assert('5. canFinish', canFinish(2, [[1, 0]]), true);
+    assert('6. findOrder', findOrder(2, [[1, 0]]), [0, 1]);
+    assert('7. findCircleNum', findCircleNum([[1, 1, 0], [1, 1, 0], [0, 0, 1]]), 2);
+    assert('8. findRedundantConnection', findRedundantConnection([[1, 2], [1, 3], [2, 3]]), [2, 3]);
+    assert('9. ladderLength', ladderLength('hit', 'cog', ['hot', 'dot', 'dog', 'lot', 'log', 'cog']), 5);
+    assert('10. longestIncreasingPath', longestIncreasingPath([[9, 9, 4], [6, 6, 8], [2, 1, 1]]), 4);
+    assert('11. isBipartite', isBipartite([[1, 2, 3], [0, 2], [0, 1, 3], [0, 2]]), false);
+    assert('13. orangesRotting', orangesRotting([[2, 1, 1], [1, 1, 0], [0, 1, 1]]), 4);
+    assert('15. openLock', openLock(['0201', '0101', '0102', '1212', '2002'], '0202'), 6);
+    assert('18. networkDelayTime', networkDelayTime([[2, 1, 1], [2, 3, 1], [3, 4, 1]], 4, 2), 2);
+    assert('19. minReorder', minReorder(6, [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]]), 3);
+    console.log('030401 tests done.');
+}
+test030401();

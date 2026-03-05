@@ -1,184 +1,377 @@
 /**
- * 030301 面试题（20 道）- 专题：React 业务与功能实现
+ * 030301 面试算法题（20 道）- 专题：回溯与组合
  * 日期：2026-03-03
- * 类型：Hooks、表单、列表、路由、状态、组件设计等
  */
 
-// ==================== 1. 受控与非受控表单 ====================
-// 题干：实现一个登录表单（用户名、密码），分别用受控组件和 useRef 非受控两种方式，并提交时打印值。
-// 输入：无
-// 输出：两个 React 组件代码（或关键片段）
-// 约束：包含 submit 处理
+class ListNode { constructor(val, next = null) { this.val = val; this.next = next; } }
+class TreeNode { constructor(val, left = null, right = null) { this.val = val; this.left = left; this.right = right; } }
 
-// 实现：
+// ==================== 1. 全排列 ====================
+function permute(nums) {
+    const res = [];
+    const dfs = (path, used) => {
+        if (path.length === nums.length) { res.push([...path]); return; }
+        for (let i = 0; i < nums.length; i++) {
+            if (used[i]) continue;
+            used[i] = true;
+            path.push(nums[i]);
+            dfs(path, used);
+            path.pop();
+            used[i] = false;
+        }
+    };
+    dfs([], []);
+    return res;
+}
 
+// ==================== 2. 全排列 II（含重复） ====================
+function permuteUnique(nums) {
+    nums.sort((a, b) => a - b);
+    const res = [];
+    const dfs = (path, used) => {
+        if (path.length === nums.length) { res.push([...path]); return; }
+        for (let i = 0; i < nums.length; i++) {
+            if (used[i] || (i > 0 && nums[i] === nums[i - 1] && !used[i - 1])) continue;
+            used[i] = true;
+            path.push(nums[i]);
+            dfs(path, used);
+            path.pop();
+            used[i] = false;
+        }
+    };
+    dfs([], []);
+    return res;
+}
 
-// ==================== 2. 自定义 useRequest ====================
-// 题干：实现 useRequest(url)，返回 { data, loading, error, refetch }。请求中不重复发起。
-// 输入：url: string
-// 输出：{ data, loading, error, refetch }
-// 约束：用 useState + useEffect，可选用 abort
+// ==================== 3. 组合 ====================
+function combine(n, k) {
+    const res = [];
+    const dfs = (start, path) => {
+        if (path.length === k) { res.push([...path]); return; }
+        for (let i = start; i <= n; i++) {
+            path.push(i);
+            dfs(i + 1, path);
+            path.pop();
+        }
+    };
+    dfs(1, []);
+    return res;
+}
 
-// 实现：
+// ==================== 4. 组合总和 ====================
+function combinationSum(candidates, target) {
+    const res = [];
+    const dfs = (start, path, sum) => {
+        if (sum === target) { res.push([...path]); return; }
+        if (sum > target) return;
+        for (let i = start; i < candidates.length; i++) {
+            path.push(candidates[i]);
+            dfs(i, path, sum + candidates[i]);
+            path.pop();
+        }
+    };
+    dfs(0, [], 0);
+    return res;
+}
 
+// ==================== 5. 组合总和 II（每个只能用一次） ====================
+function combinationSum2(candidates, target) {
+    candidates.sort((a, b) => a - b);
+    const res = [];
+    const dfs = (start, path, sum) => {
+        if (sum === target) { res.push([...path]); return; }
+        if (sum > target) return;
+        for (let i = start; i < candidates.length; i++) {
+            if (i > start && candidates[i] === candidates[i - 1]) continue;
+            path.push(candidates[i]);
+            dfs(i + 1, path, sum + candidates[i]);
+            path.pop();
+        }
+    };
+    dfs(0, [], 0);
+    return res;
+}
 
-// ==================== 3. 自定义 useDebounce / useDebouncedValue ====================
-// 题干：实现 useDebouncedValue(value, delay)，返回防抖后的值，用于搜索框等。
-// 输入：value: any, delay: number
-// 输出：debouncedValue
-// 约束：useEffect + 定时器清理
+// ==================== 6. 子集 ====================
+function subsets(nums) {
+    const res = [];
+    const dfs = (start, path) => {
+        res.push([...path]);
+        for (let i = start; i < nums.length; i++) {
+            path.push(nums[i]);
+            dfs(i + 1, path);
+            path.pop();
+        }
+    };
+    dfs(0, []);
+    return res;
+}
 
-// 实现：
+// ==================== 7. 子集 II（含重复） ====================
+function subsetsWithDup(nums) {
+    nums.sort((a, b) => a - b);
+    const res = [];
+    const dfs = (start, path) => {
+        res.push([...path]);
+        for (let i = start; i < nums.length; i++) {
+            if (i > start && nums[i] === nums[i - 1]) continue;
+            path.push(nums[i]);
+            dfs(i + 1, path);
+            path.pop();
+        }
+    };
+    dfs(0, []);
+    return res;
+}
 
+// ==================== 8. 括号生成 ====================
+function generateParenthesis(n) {
+    const res = [];
+    const dfs = (open, close, s) => {
+        if (s.length === 2 * n) { res.push(s); return; }
+        if (open < n) dfs(open + 1, close, s + '(');
+        if (close < open) dfs(open, close + 1, s + ')');
+    };
+    dfs(0, 0, '');
+    return res;
+}
 
-// ==================== 4. 自定义 useLocalStorage ====================
-// 题干：实现 useLocalStorage(key, initialValue)，行为类似 useState，但持久化到 localStorage。
-// 输入：key: string, initialValue: any
-// 输出：[value, setValue]
-// 约束：同步 localStorage 与 SSR 安全（可选）
+// ==================== 9. 电话号码的字母组合 ====================
+function letterCombinations(digits) {
+    if (!digits) return [];
+    const map = { '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz' };
+    const res = [];
+    const dfs = (i, s) => {
+        if (i === digits.length) { res.push(s); return; }
+        for (const c of map[digits[i]] || '') dfs(i + 1, s + c);
+    };
+    dfs(0, '');
+    return res;
+}
 
-// 实现：
+// ==================== 10. 分割回文串 ====================
+function partition(s) {
+    const res = [];
+    const isPal = (l, r) => { while (l < r) if (s[l++] !== s[r--]) return false; return true; };
+    const dfs = (start, path) => {
+        if (start === s.length) { res.push([...path]); return; }
+        for (let end = start; end < s.length; end++) {
+            if (!isPal(start, end)) continue;
+            path.push(s.slice(start, end + 1));
+            dfs(end + 1, path);
+            path.pop();
+        }
+    };
+    dfs(0, []);
+    return res;
+}
 
+// ==================== 11. 复原 IP 地址 ====================
+function restoreIpAddresses(s) {
+    const res = [];
+    const dfs = (start, path) => {
+        if (path.length === 4) {
+            if (start === s.length) res.push(path.join('.'));
+            return;
+        }
+        for (let len = 1; len <= 3 && start + len <= s.length; len++) {
+            const seg = s.slice(start, start + len);
+            if ((seg[0] === '0' && len > 1) || parseInt(seg, 10) > 255) continue;
+            path.push(seg);
+            dfs(start + len, path);
+            path.pop();
+        }
+    };
+    dfs(0, []);
+    return res;
+}
 
-// ==================== 5. 列表虚拟滚动（思路或简化实现） ====================
-// 题干：长列表（如 10000 条）只渲染可视区域 + 缓冲，说明思路或写出简化版（固定高度、根据 scrollTop 计算 startIndex/endIndex）。
-// 输入：items: any[], itemHeight: number, containerHeight: number
-// 输出：只渲染可见项的组件结构或伪代码
-// 约束：至少说明 start/end 计算与总高度占位
+// ==================== 12. 单词搜索 ====================
+function exist(board, word) {
+    const m = board.length, n = board[0].length;
+    const dfs = (i, j, k) => {
+        if (k === word.length) return true;
+        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j] !== word[k]) return false;
+        const c = board[i][j];
+        board[i][j] = '';
+        const ok = dfs(i + 1, j, k + 1) || dfs(i - 1, j, k + 1) || dfs(i, j + 1, k + 1) || dfs(i, j - 1, k + 1);
+        board[i][j] = c;
+        return ok;
+    };
+    for (let i = 0; i < m; i++)
+        for (let j = 0; j < n; j++)
+            if (dfs(i, j, 0)) return true;
+    return false;
+}
 
-// 实现：
+// ==================== 13.  N 皇后 ====================
+function solveNQueens(n) {
+    const res = [];
+    const cols = new Set(), diag1 = new Set(), diag2 = new Set();
+    const board = Array(n).fill(null).map(() => Array(n).fill('.'));
+    const dfs = (row) => {
+        if (row === n) { res.push(board.map(r => r.join(''))); return; }
+        for (let col = 0; col < n; col++) {
+            if (cols.has(col) || diag1.has(row - col) || diag2.has(row + col)) continue;
+            cols.add(col); diag1.add(row - col); diag2.add(row + col);
+            board[row][col] = 'Q';
+            dfs(row + 1);
+            board[row][col] = '.';
+            cols.delete(col); diag1.delete(row - col); diag2.delete(row + col);
+        }
+    };
+    dfs(0);
+    return res;
+}
 
+// ==================== 14. N 皇后 II ====================
+function totalNQueens(n) {
+    return solveNQueens(n).length;
+}
 
-// ==================== 6. 无限滚动加载 ====================
-// 题干：实现一个列表，滚动到底部时自动加载下一页（fetch），并拼接数据。用 IntersectionObserver 或 scroll 事件。
-// 输入：初始 API 与 loadMore API
-// 输出：组件关键逻辑（state、effect、ref）
-// 约束：防重复请求、loading 态
+// ==================== 15. 解数独 ====================
+function solveSudoku(board) {
+    const box = (r, c) => 3 * ((r / 3) | 0) + ((c / 3) | 0);
+    const rows = Array(9).fill(0).map(() => new Set());
+    const cols = Array(9).fill(0).map(() => new Set());
+    const boxes = Array(9).fill(0).map(() => new Set());
+    for (let i = 0; i < 9; i++)
+        for (let j = 0; j < 9; j++) {
+            const c = board[i][j];
+            if (c !== '.') { rows[i].add(c); cols[j].add(c); boxes[box(i, j)].add(c); }
+        }
+    const dfs = () => {
+        for (let i = 0; i < 9; i++)
+            for (let j = 0; j < 9; j++) {
+                if (board[i][j] !== '.') continue;
+                for (let d = 1; d <= 9; d++) {
+                    const ch = String(d);
+                    if (rows[i].has(ch) || cols[j].has(ch) || boxes[box(i, j)].has(ch)) continue;
+                    board[i][j] = ch;
+                    rows[i].add(ch); cols[j].add(ch); boxes[box(i, j)].add(ch);
+                    if (dfs()) return true;
+                    board[i][j] = '.';
+                    rows[i].delete(ch); cols[j].delete(ch); boxes[box(i, j)].delete(ch);
+                }
+                return false;
+            }
+        return true;
+    };
+    dfs();
+}
 
-// 实现：
+// ==================== 16. 递增子序列 ====================
+function findSubsequences(nums) {
+    const res = [];
+    const dfs = (start, path) => {
+        if (path.length >= 2) res.push([...path]);
+        const used = new Set();
+        for (let i = start; i < nums.length; i++) {
+            if (used.has(nums[i]) || (path.length && nums[i] < path[path.length - 1])) continue;
+            used.add(nums[i]);
+            path.push(nums[i]);
+            dfs(i + 1, path);
+            path.pop();
+        }
+    };
+    dfs(0, []);
+    return res;
+}
 
+// ==================== 17. 重新安排行程 ====================
+function findItinerary(tickets) {
+    const g = {};
+    for (const [from, to] of tickets) {
+        if (!g[from]) g[from] = [];
+        g[from].push(to);
+    }
+    for (const k of Object.keys(g)) g[k].sort();
+    const res = [];
+    const dfs = (cur) => {
+        while (g[cur] && g[cur].length) dfs(g[cur].shift());
+        res.unshift(cur);
+    };
+    dfs('JFK');
+    return res;
+}
 
-// ==================== 7. 多选与全选（表格/列表） ====================
-// 题干：实现列表项多选 + 表头全选（全选勾选时全部选中，取消全选时全部取消；手动全部选中时全选勾上）。
-// 输入：dataSource: { id, name }[]
-// 输出：组件 state 设计 + 全选/单选的 handler
-// 约束：受控或内部 state 均可
+// ==================== 18. 二进制手表 ====================
+function readBinaryWatch(turnedOn) {
+    const res = [];
+    const count = (n) => n.toString(2).split('0').join('').length;
+    for (let h = 0; h < 12; h++)
+        for (let m = 0; m < 60; m++)
+            if (count(h) + count(m) === turnedOn) res.push(`${h}:${m < 10 ? '0' + m : m}`);
+    return res;
+}
 
-// 实现：
+// ==================== 19. 累加数 ====================
+function isAdditiveNumber(num) {
+    const n = num.length;
+    const dfs = (i, a, b) => {
+        if (i === n) return true;
+        const sum = String(BigInt(a) + BigInt(b));
+        if (num.slice(i, i + sum.length) !== sum) return false;
+        return dfs(i + sum.length, b, sum);
+    };
+    for (let i = 1; i <= (n - 1) >> 1; i++) {
+        if (num[0] === '0' && i > 1) break;
+        const a = num.slice(0, i);
+        for (let j = 1; Math.max(i, j) <= n - i - j; j++) {
+            if (num[i] === '0' && j > 1) break;
+            const b = num.slice(i, i + j);
+            if (dfs(i + j, a, b)) return true;
+        }
+    }
+    return false;
+}
 
+// ==================== 20. 划分为k个相等的子集 ====================
+function canPartitionKSubsets(nums, k) {
+    const sum = nums.reduce((a, b) => a + b, 0);
+    if (sum % k) return false;
+    const target = sum / k;
+    nums.sort((a, b) => b - a);
+    if (nums[0] > target) return false;
+    const used = new Array(nums.length).fill(false);
+    const dfs = (start, cur, cnt) => {
+        if (cnt === k) return true;
+        if (cur === target) return dfs(0, 0, cnt + 1);
+        for (let i = start; i < nums.length; i++) {
+            if (used[i] || cur + nums[i] > target) continue;
+            used[i] = true;
+            if (dfs(i + 1, cur + nums[i], cnt)) return true;
+            used[i] = false;
+        }
+        return false;
+    };
+    return dfs(0, 0, 0);
+}
 
-// ==================== 8. 表单校验（同步 + 异步） ====================
-// 题干：实现简单表单校验：用户名必填、长度 2～10；密码再次输入一致。可选：用户名失焦时异步校验是否已存在。
-// 输入：无
-// 输出：表单组件 + 校验逻辑
-// 约束：显示错误信息、提交时统一校验
-
-// 实现：
-
-
-// ==================== 9. 弹窗与 Portal ====================
-// 题干：实现一个 Modal 组件，通过 ReactDOM.createPortal 渲染到 body，支持 mask 点击关闭、ESC 关闭、打开时锁定 body 滚动。
-// 输入：visible, onClose, children
-// 输出：Modal 组件代码
-// 约束：无 UI 库依赖
-
-// 实现：
-
-
-// ==================== 10. 路由鉴权（ProtectedRoute） ====================
-// 题干：实现一个 ProtectedRoute，未登录时跳转登录页（或重定向到 /login），登录后可访问子组件。
-// 输入：假设有 useAuth() 返回 { isLoggedIn }
-// 输出：ProtectedRoute 组件（含 Redirect 或 Navigate）
-// 约束：React Router v6 或 v5 任选
-
-// 实现：
-
-
-// ==================== 11. 全局状态：主题/语言切换 ====================
-// 题干：用 Context + useState 实现主题（light/dark）和语言（zh/en）切换，并在某子组件中消费并展示当前值。
-// 输入：无
-// 输出：Context 定义 + Provider + 使用处的组件
-// 约束：避免不必要的重渲染（可选 useMemo）
-
-// 实现：
-
-
-// ==================== 12. 组件通信：兄弟节点 ====================
-// 题干：两个兄弟组件 A 和 B，A 中点击按钮改变 B 中显示的数字。至少给出两种方案：提升 state 到父组件、Context、事件总线（简单实现）。
-// 输入：无
-// 输出：关键代码结构
-// 约束：说明适用场景
-
-// 实现：
-
-
-// ==================== 13. 动态表单（动态增减表单项） ====================
-// 题干：表单中有「联系人」列表，可添加/删除多条，每条有姓名、电话。提交时得到数组。用 React 实现。
-// 输入：无
-// 输出：表单 state 结构 + 添加/删除逻辑 + 提交
-// 约束：受控组件
-
-// 实现：
-
-
-// ==================== 14. useReducer 管理复杂状态 ====================
-// 题干：用 useReducer 实现一个简单 TodoList：添加、删除、切换完成状态。写出 reducer 与初始 state。
-// 输入：无
-// 输出：reducer + initialState + 使用示例
-// 约束：action 类型清晰
-
-// 实现：
-
-
-// ==================== 15. 避免子组件不必要的重渲染 ====================
-// 题干：父组件 state 变化导致所有子组件重渲染。说明如何用 React.memo、useCallback、useMemo 优化，并写出示例。
-// 输入：无
-// 输出：优化前后对比或关键代码
-// 约束：至少用到 memo + useCallback
-
-// 实现：
-
-
-// ==================== 16. 封装一个 Table 组件（简化版） ====================
-// 题干：接收 columns（title, dataIndex, key）和 dataSource，渲染表头与表格 body，支持 key 对应渲染。
-// 输入：columns: { title, dataIndex, key }[], dataSource: object[]
-// 输出：Table 组件 JSX 结构
-// 约束：不要求排序、筛选，仅展示
-
-// 实现：
-
-
-// ==================== 17. 实现 Tabs 组件 ====================
-// 题干：Tabs 下多个 TabPane，点击切换显示对应 content，当前 tab 高亮。
-// 输入：tabs: { key, label, children }[]
-// 输出：Tabs 组件（受控或非受控）
-// 约束：可扩展为受控 activeKey + onChange
-
-// 实现：
-
-
-// ==================== 18. 文件上传与进度 ====================
-// 题干：实现文件上传（单文件），使用 XMLHttpRequest 或 fetch，展示上传进度（percent）和结果（成功/失败）。
-// 输入：无
-// 输出：上传组件逻辑（onChange file、xhr.upload.onprogress、状态）
-// 约束：进度条 UI 可简化
-
-// 实现：
-
-
-// ==================== 19. 倒计时组件 ====================
-// 题干：实现一个倒计时组件，传入目标时间戳或秒数，显示剩余 天:时:分:秒，到 0 后停止并回调 onEnd。
-// 输入：targetTime: number (timestamp or seconds), onEnd?: () => void
-// 输出：组件代码
-// 约束：setInterval 或 requestAnimationFrame，清理定时器
-
-// 实现：
-
-
-// ==================== 20. 树形数据与递归渲染 ====================
-// 题干：数据格式为 { id, label, children?: [] }，递归渲染成可折叠的树形结构（点击展开/收起）。
-// 输入：treeData: TreeNode[]
-// 输出：Tree 组件（递归子节点）
-// 约束：每层缩进、展开状态可本地 state 或受控
-
-// 实现：
+// ==================== 测试 ====================
+function test030301() {
+    const assert = (name, got, expect) => {
+        const ok = JSON.stringify(got) === JSON.stringify(expect);
+        console.log(ok ? `[OK] ${name}` : `[FAIL] ${name} got=${JSON.stringify(got)} expect=${JSON.stringify(expect)}`);
+    };
+    assert('1. permute', permute([1, 2, 3]).length, 6);
+    assert('2. permuteUnique', permuteUnique([1, 1, 2]).length, 3);
+    assert('3. combine', combine(4, 2).length, 6);
+    assert('4. combinationSum', combinationSum([2, 3, 6, 7], 7).length, 2);
+    assert('5. combinationSum2', combinationSum2([10, 1, 2, 7, 6, 1, 5], 8).length, 4);
+    assert('6. subsets', subsets([1, 2, 3]).length, 8);
+    assert('7. subsetsWithDup', subsetsWithDup([1, 2, 2]).length, 6);
+    assert('8. generateParenthesis', generateParenthesis(3).length, 5);
+    assert('9. letterCombinations', letterCombinations('23').length, 9);
+    assert('10. partition', partition('aab').length, 2);
+    assert('11. restoreIpAddresses', restoreIpAddresses('25525511135').length, 2);
+    assert('12. exist', exist([['A', 'B', 'C', 'E'], ['S', 'F', 'C', 'S'], ['A', 'D', 'E', 'E']], 'ABCCED'), true);
+    assert('13. solveNQueens', solveNQueens(4).length, 2);
+    assert('14. totalNQueens', totalNQueens(4), 2);
+    assert('16. findSubsequences', findSubsequences([4, 6, 7, 7]).length, 8);
+    assert('18. readBinaryWatch', readBinaryWatch(1).length, 10);
+    assert('19. isAdditiveNumber', isAdditiveNumber('112358'), true);
+    assert('20. canPartitionKSubsets', canPartitionKSubsets([4, 3, 2, 3, 5, 2, 1], 4), true);
+    console.log('030301 tests done.');
+}
+test030301();

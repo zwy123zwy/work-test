@@ -1,184 +1,318 @@
 /**
- * 030201 面试题（20 道）- 专题：CSS 与布局
+ * 030201 面试算法题（20 道）- 专题：二分查找与排序
  * 日期：2026-03-02
- * 类型：布局、选择器、动画、响应式、BEM、兼容等
  */
 
-// ==================== 1. 水平垂直居中 ====================
-// 题干：实现一个 200×200 的盒子在视口内水平垂直居中。至少写出 3 种方案（flex、grid、定位+transform）。
-// 输入：无
-// 输出：CSS 代码片段（或类名 + 说明）
-// 约束：兼容现代浏览器
+class ListNode { constructor(val, next = null) { this.val = val; this.next = next; } }
+class TreeNode { constructor(val, left = null, right = null) { this.val = val; this.left = left; this.right = right; } }
 
-// 实现：
+// ==================== 1. 二分查找 ====================
+function search(nums, target) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo <= hi) {
+        const mid = (lo + hi) >>> 1;
+        if (nums[mid] === target) return mid;
+        if (nums[mid] < target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}
 
+// ==================== 2. 搜索插入位置 ====================
+function searchInsert(nums, target) {
+    let lo = 0, hi = nums.length;
+    while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (nums[mid] < target) lo = mid + 1;
+        else hi = mid;
+    }
+    return lo;
+}
 
-// ==================== 2. 两栏布局（左固定右自适应） ====================
-// 题干：左侧 200px 固定，右侧占满剩余宽度。至少 2 种：float、flex、grid。
-// 输入：无
-// 输出：HTML 结构 + CSS
-// 约束：右侧不遮挡左侧
+// ==================== 3. 在排序数组中查找元素的第一个和最后一个位置 ====================
+function searchRange(nums, target) {
+    const left = (lo, hi) => {
+        while (lo < hi) {
+            const mid = (lo + hi) >>> 1;
+            if (nums[mid] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    };
+    const right = (lo, hi) => {
+        while (lo < hi) {
+            const mid = (lo + hi + 1) >>> 1;
+            if (nums[mid] > target) hi = mid - 1;
+            else lo = mid;
+        }
+        return lo;
+    };
+    const l = left(0, nums.length);
+    if (l === nums.length || nums[l] !== target) return [-1, -1];
+    return [l, right(0, nums.length - 1)];
+}
 
-// 实现：
+// ==================== 4. 搜索旋转排序数组 ====================
+function searchRotated(nums, target) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo <= hi) {
+        const mid = (lo + hi) >>> 1;
+        if (nums[mid] === target) return mid;
+        if (nums[lo] <= nums[mid]) {
+            if (target >= nums[lo] && target < nums[mid]) hi = mid - 1;
+            else lo = mid + 1;
+        } else {
+            if (target > nums[mid] && target <= nums[hi]) lo = mid + 1;
+            else hi = mid - 1;
+        }
+    }
+    return -1;
+}
 
+// ==================== 5. 寻找旋转排序数组中的最小值 ====================
+function findMin(nums) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (nums[mid] > nums[hi]) lo = mid + 1;
+        else hi = mid;
+    }
+    return nums[lo];
+}
 
-// ==================== 3. 三栏布局（左右固定中间自适应） ====================
-// 题干：左 200px、右 200px，中间自适应。双飞翼/圣杯或 flex/grid。
-// 输入：无
-// 输出：结构 + CSS
-// 约束：中间列先渲染（SEO）
+// ==================== 6. 搜索二维矩阵 ====================
+function searchMatrix(matrix, target) {
+    const m = matrix.length, n = matrix[0].length;
+    let lo = 0, hi = m * n - 1;
+    while (lo <= hi) {
+        const mid = (lo + hi) >>> 1;
+        const v = matrix[(mid / n) | 0][mid % n];
+        if (v === target) return true;
+        if (v < target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return false;
+}
 
-// 实现：
+// ==================== 7. 寻找峰值 ====================
+function findPeakElement(nums) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (nums[mid] > nums[mid + 1]) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}
 
+// ==================== 8. 有效的完全平方数 ====================
+function isPerfectSquare(num) {
+    let lo = 0, hi = num;
+    while (lo <= hi) {
+        const mid = (lo + hi) >>> 1;
+        const sq = mid * mid;
+        if (sq === num) return true;
+        if (sq < num) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return false;
+}
 
-// ==================== 4. Flex 实现等分布局 ====================
-// 题干：一行内多个子元素等分空间，最后一行不足时左对齐且不拉伸。
-// 输入：无
-// 输出：CSS（flex + 子项）
-// 约束：子项不设固定宽度
+// ==================== 9. 排序数组（归并） ====================
+function sortArray(nums) {
+    if (nums.length <= 1) return nums;
+    const mid = nums.length >> 1;
+    const left = sortArray(nums.slice(0, mid));
+    const right = sortArray(nums.slice(mid));
+    const res = [];
+    let i = 0, j = 0;
+    while (i < left.length && j < right.length)
+        res.push(left[i] <= right[j] ? left[i++] : right[j++]);
+    return res.concat(left.slice(i), right.slice(j));
+}
 
-// 实现：
+// ==================== 10. 数组中的第K个最大元素 ====================
+function findKthLargest(nums, k) {
+    const swap = (i, j) => [nums[i], nums[j]] = [nums[j], nums[i]];
+    const partition = (lo, hi) => {
+        const pivot = nums[hi];
+        let i = lo;
+        for (let j = lo; j < hi; j++)
+            if (nums[j] >= pivot) swap(i++, j);
+        swap(i, hi);
+        return i;
+    };
+    let lo = 0, hi = nums.length - 1;
+    k = k - 1;
+    while (true) {
+        const p = partition(lo, hi);
+        if (p === k) return nums[p];
+        if (p < k) lo = p + 1;
+        else hi = p - 1;
+    }
+}
 
+// ==================== 11. 合并两个有序数组 ====================
+function mergeSorted(nums1, m, nums2, n) {
+    let i = m - 1, j = n - 1, k = m + n - 1;
+    while (j >= 0)
+        nums1[k--] = (i >= 0 && nums1[i] > nums2[j]) ? nums1[i--] : nums2[j--];
+}
 
-// ==================== 5. Grid 实现九宫格 ====================
-// 题干：3×3 九宫格，等高且等宽，用 CSS Grid 实现。
-// 输入：无
-// 输出：HTML + CSS
-// 约束：grid-template-rows/columns 或 grid-area
+// ==================== 12. 合并区间（按起点排序后合并） ====================
+function mergeIntervals(intervals) {
+    if (!intervals.length) return [];
+    intervals.sort((a, b) => a[0] - b[0]);
+    const res = [intervals[0]];
+    for (let i = 1; i < intervals.length; i++) {
+        if (intervals[i][0] <= res[res.length - 1][1])
+            res[res.length - 1][1] = Math.max(res[res.length - 1][1], intervals[i][1]);
+        else res.push(intervals[i]);
+    }
+    return res;
+}
 
-// 实现：
+// ==================== 13. 最大数（自定义排序） ====================
+function largestNumber(nums) {
+    const s = nums.map(String).sort((a, b) => (b + a).localeCompare(a + b));
+    return s[0] === '0' ? '0' : s.join('');
+}
 
+// ==================== 14. 颜色分类 ====================
+function sortColors(nums) {
+    let i = 0, j = 0, k = nums.length - 1;
+    while (j <= k) {
+        if (nums[j] === 0) { [nums[i], nums[j]] = [nums[j], nums[i]]; i++; j++; }
+        else if (nums[j] === 2) { [nums[j], nums[k]] = [nums[k], nums[j]]; k--; }
+        else j++;
+    }
+}
 
-// ==================== 6. 选择器优先级 ====================
-// 题干：写出优先级从低到高：元素、类、ID、内联、!important。计算 (0,2,1) 与 (0,1,3) 谁高。
-// 输入：无
-// 输出：简短说明 + 计算示例
-// 约束：a-b-c 计数法
+// ==================== 15. 对链表进行插入排序 ====================
+function insertionSortList(head) {
+    const dummy = new ListNode(-Infinity);
+    while (head) {
+        let p = dummy;
+        while (p.next && p.next.val < head.val) p = p.next;
+        const next = head.next;
+        head.next = p.next;
+        p.next = head;
+        head = next;
+    }
+    return dummy.next;
+}
 
-// 实现：
+// ==================== 16.  H 指数 ====================
+function hIndex(citations) {
+    citations.sort((a, b) => b - a);
+    let h = 0;
+    while (h < citations.length && citations[h] > h) h++;
+    return h;
+}
 
+// ==================== 17. 在 D 天内送达包裹的能力 ====================
+function shipWithinDays(weights, days) {
+    let lo = Math.max(...weights), hi = weights.reduce((a, b) => a + b, 0);
+    const ok = (cap) => {
+        let d = 1, cur = 0;
+        for (const w of weights) {
+            if (cur + w > cap) { d++; cur = 0; }
+            cur += w;
+        }
+        return d <= days;
+    };
+    while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (ok(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}
 
-// ==================== 7. BFC 与清除浮动 ====================
-// 题干：什么是 BFC？列出 3 种触发方式。用 BFC 清除浮动并写出示例。
-// 输入：无
-// 输出：概念说明 + 示例 CSS
-// 约束：overflow / float / display: flow-root 等
+// ==================== 18. 爱吃香蕉的珂珂 ====================
+function minEatingSpeed(piles, h) {
+    let lo = 1, hi = Math.max(...piles);
+    const ok = (k) => piles.reduce((s, p) => s + Math.ceil(p / k), 0) <= h;
+    while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (ok(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}
 
-// 实现：
+// ==================== 19. 寻找两个正序数组的中位数 ====================
+function findMedianSortedArrays(nums1, nums2) {
+    const m = nums1.length, n = nums2.length;
+    const k = (m + n + 1) >> 1;
+    const get = (arr, i) => (i < 0 ? -Infinity : i >= arr.length ? Infinity : arr[i]);
+    let lo = 0, hi = m;
+    while (lo <= hi) {
+        const i = (lo + hi) >>> 1, j = k - i;
+        if (get(nums1, i - 1) > get(nums2, j)) hi = i - 1;
+        else if (get(nums2, j - 1) > get(nums1, i)) lo = i + 1;
+        else {
+            const left = Math.max(get(nums1, i - 1), get(nums2, j - 1));
+            if ((m + n) % 2) return left;
+            const right = Math.min(get(nums1, i), get(nums2, j));
+            return (left + right) / 2;
+        }
+    }
+    return 0;
+}
 
+// ==================== 20. 计算右侧小于当前元素的个数 ====================
+function countSmaller(nums) {
+    const res = Array(nums.length).fill(0);
+    const arr = nums.map((v, i) => [v, i]);
+    const merge = (lo, mid, hi) => {
+        const left = arr.slice(lo, mid + 1), right = arr.slice(mid + 1, hi + 1);
+        let i = 0, j = 0, k = lo, rightCount = 0;
+        while (i < left.length && j < right.length) {
+            if (left[i][0] <= right[j][0]) {
+                res[left[i][1]] += rightCount;
+                arr[k++] = left[i++];
+            } else { rightCount++; arr[k++] = right[j++]; }
+        }
+        while (i < left.length) { res[left[i][1]] += rightCount; arr[k++] = left[i++]; }
+        while (j < right.length) arr[k++] = right[j++];
+    };
+    const sort = (lo, hi) => {
+        if (lo >= hi) return;
+        const mid = (lo + hi) >>> 1;
+        sort(lo, mid);
+        sort(mid + 1, hi);
+        merge(lo, mid, hi);
+    };
+    sort(0, nums.length - 1);
+    return res;
+}
 
-// ==================== 8. 实现三角形 ====================
-// 题干：仅用 border 实现一个朝下的三角形（无宽高，用透明 border）。
-// 输入：无
-// 输出：CSS
-// 约束：兼容性好
-
-// 实现：
-
-
-// ==================== 9. 单行与多行省略 ====================
-// 题干：单行文本溢出显示省略号；多行（如 3 行）溢出省略。写出完整 CSS。
-// 输入：无
-// 输出：CSS（-webkit-line-clamp 等）
-// 约束：多行需说明兼容性
-
-// 实现：
-
-
-// ==================== 10. sticky 吸顶 ====================
-// 题干：实现滚动时某栏在视口顶部吸顶（sticky），写出 HTML 结构 + CSS。
-// 输入：无
-// 输出：结构 + CSS
-// 约束：说明父级 overflow 的影响
-
-// 实现：
-
-
-// ==================== 11. 1px 线（移动端） ====================
-// 题干：移动端 1px 物理像素线过粗，写出 1～2 种解决方案（transform scale、媒体查询+伪元素）。
-// 输入：无
-// 输出：CSS 或 SCSS 片段
-// 约束：说明 DPR
-
-// 实现：
-
-
-// ==================== 12. 水平滚动与隐藏滚动条 ====================
-// 题干：实现横向滚动区域，内容不换行，且隐藏滚动条（保留滚动行为）。
-// 输入：无
-// 输出：CSS
-// 约束：webkit 与 Firefox 兼容
-
-// 实现：
-
-
-// ==================== 13. CSS 变量与主题切换 ====================
-// 题干：用 CSS 变量实现亮色/暗色主题切换，定义 --color-bg、--color-text 等，提供切换的 JS 或 class 方案。
-// 输入：无
-// 输出：CSS + 简短 JS 或说明
-// 约束：根节点设置变量
-
-// 实现：
-
-
-// ==================== 14. 动画：无限旋转 ====================
-// 题干：实现一个图标绕中心无限旋转的动画（keyframes + animation）。
-// 输入：无
-// 输出：CSS
-// 约束：使用 transform: rotate
-
-// 实现：
-
-
-// ==================== 15. 动画：从左侧滑入 ====================
-// 题干：元素从左侧 -100% 滑入到 0，时长 0.3s，ease-out。用 transition 或 keyframes。
-// 输入：无
-// 输出：CSS
-// 约束：可配合 visibility/opacity
-
-// 实现：
-
-
-// ==================== 16. 响应式断点 ====================
-// 题干：写出移动端优先的常用断点（如 768、1024、1280），并实现「小屏单列、大屏三列」的媒体查询。
-// 输入：无
-// 输出：CSS 媒体查询片段
-// 约束：min-width 或 max-width 自选
-
-// 实现：
-
-
-// ==================== 17. rem 与根字体 ====================
-// 题干：设计稿 750px 宽，希望 1rem = 10px（设计稿）。写出设置根 font-size 的公式或 JS 片段。
-// 输入：无
-// 输出：公式 + 可选 JS
-// 约束：考虑 PC 端最大宽度
-
-// 实现：
-
-
-// ==================== 18. 层叠上下文 ====================
-// 题干：简述层叠上下文（stacking context）的形成条件；z-index 为何不生效时如何排查？
-// 输入：无
-// 输出：文字说明 + 1 个示例
-// 约束：提到 transform、opacity、isolation 等
-
-// 实现：
-
-
-// ==================== 19. 实现一个 loading 动画 ====================
-// 题干：实现圆点或圆环的 loading 动画（3 个点跳动或 1 个环旋转+渐变）。
-// 输入：无
-// 输出：HTML + CSS
-// 约束：纯 CSS
-
-// 实现：
-
-
-// ==================== 20. 卡片 hover 上浮阴影 ====================
-// 题干：卡片默认有浅阴影，hover 时上浮（translateY）并加深阴影，过渡 0.2s。
-// 输入：无
-// 输出：CSS
-// 约束：transition 包含 transform 和 box-shadow
-
-// 实现：
+// ==================== 测试 ====================
+function test030201() {
+    const assert = (name, got, expect) => {
+        const ok = JSON.stringify(got) === JSON.stringify(expect);
+        console.log(ok ? `[OK] ${name}` : `[FAIL] ${name} got=${JSON.stringify(got)} expect=${JSON.stringify(expect)}`);
+    };
+    assert('1. search', search([-1, 0, 3, 5, 9, 12], 9), 4);
+    assert('2. searchInsert', searchInsert([1, 3, 5, 6], 5), 2);
+    assert('3. searchRange', searchRange([5, 7, 7, 8, 8, 10], 8), [3, 4]);
+    assert('4. searchRotated', searchRotated([4, 5, 6, 7, 0, 1, 2], 0), 4);
+    assert('5. findMin', findMin([3, 4, 5, 1, 2]), 1);
+    assert('6. searchMatrix', searchMatrix([[1, 3, 5, 7], [10, 11, 16, 20], [23, 30, 34, 60]], 3), true);
+    assert('7. findPeakElement', findPeakElement([1, 2, 3, 1]), 2);
+    assert('8. isPerfectSquare', isPerfectSquare(16), true);
+    assert('9. sortArray', sortArray([5, 2, 3, 1]), [1, 2, 3, 5]);
+    assert('10. findKthLargest', findKthLargest([3, 2, 1, 5, 6, 4], 2), 5);
+    const n11 = [1, 2, 3, 0, 0, 0]; mergeSorted(n11, 3, [2, 5, 6], 3); assert('11. mergeSorted', n11, [1, 2, 2, 3, 5, 6]);
+    assert('12. mergeIntervals', mergeIntervals([[1, 3], [2, 6], [8, 10]]), [[1, 6], [8, 10]]);
+    assert('13. largestNumber', largestNumber([10, 2]), '210');
+    const n14 = [2, 0, 2, 1, 1, 0]; sortColors(n14); assert('14. sortColors', n14, [0, 0, 1, 1, 2, 2]);
+    assert('16. hIndex', hIndex([3, 0, 6, 1, 5]), 3);
+    assert('17. shipWithinDays', shipWithinDays([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5), 15);
+    assert('18. minEatingSpeed', minEatingSpeed([3, 6, 7, 11], 8), 4);
+    assert('19. findMedianSortedArrays', findMedianSortedArrays([1, 3], [2]), 2);
+    assert('20. countSmaller', countSmaller([5, 2, 6, 1]), [2, 1, 1, 0]);
+    console.log('030201 tests done.');
+}
+test030201();
