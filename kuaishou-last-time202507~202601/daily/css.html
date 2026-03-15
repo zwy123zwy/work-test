@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .r1 {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+            margin: 0 auto;
+            /* 水平居中 */
+        }
+
+        .r2 {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+            position: absolute;
+            /* 绝对定位 */
+            left: 50%;
+            /* 左边距为父元素宽度的一半 */
+            transform: translateX(-50%);
+            /* 向左移动自身宽度的一半，实现水平居中 */
+        }
+
+        .r3 {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+            display: flex;
+            /* 使用 Flexbox 布局 */
+            justify-content: center;
+            /* 水平居中 */
+            align-items: center;
+            /* 垂直居中 */
+        }
+
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            /* 左边界为透明 */
+            border-right: 50px solid transparent;
+            /* 右边界为透明 */
+            border-bottom: 100px solid red;
+            /* 下边界为红色，形成三角形 */
+        }
+
+        div {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+            line-height: 100px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .div1 {
+            background: red;
+            margin: 0 auto;
+        }
+
+        .div2 {
+            background: green;
+            float: left;
+            margin-left: 50%;
+        }
+
+        .div3 {
+            background: blue;
+            float: left;
+            margin-left: -200px;
+        }
+        
+        .grid {
+            display: grid;
+            /* 使用 CSS Grid 布局 */
+            grid-template-columns: repeat(3, 1fr);
+            /* 定义三列，每列占据相等的空间 */
+            grid-template-rows: repeat(3, 1fr);
+            /* 定义三行，每行占据相等的空间 */
+            gap: 10px;
+            /* 网格间距 */
+        }
+        
+        .cell {
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 水平和垂直居中 */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 水平居中  -->
+    <div class="r1"></div>
+    <div class="r2"></div>
+    <div class="r3"></div>
+    <!-- 三角形 -->
+    <div class="triangle"></div>
+    <!-- 品字布局 -->
+    <div class="pin">
+        <div class="div1">1</div>
+        <div class="div2">2</div>
+        <div class="div3">3</div>
+    </div>
+    
+    <!-- 九宫格 -->
+    <div class="grid">
+        <div class="cell">1</div>
+        <div class="cell">2</div>
+        <div class="cell">3</div>
+        <div class="cell">4</div>
+        <div class="cell">5</div>
+        <div class="cell">6</div>
+        <div class="cell">7</div>
+        <div class="cell">8</div>
+        <div class="cell">9</div>
+    </div>
+</body>
+
+</html>
