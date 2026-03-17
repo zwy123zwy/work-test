@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 聊天对话框</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background: #f5f5f5;
+            padding: 16px;
+        }
+
+        .chat {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .msg {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+
+        .msg.user {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+        }
+
+        .avatar {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .msg.user .avatar {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .content {
+            position: relative;
+            flex: 0 1 auto;
+            min-width: 0;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 6px solid transparent;
+            border-right-color: #fff;
+            left: -10px;
+            top: 12px;
+        }
+
+        .msg.user .content {
+            flex: 0 1 auto;
+            max-width: 75%;
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .msg.user .content::before {
+            left: auto;
+            right: -10px;
+            border-right-color: transparent;
+            border-left-color: #4caf50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat">
+        <div class="msg">
+            <div class="avatar">AI</div>
+            <div class="content">你好！我是 AI 助手。有什么可以帮助你的？这是一段很长很长的内容，用来测试自动换行效果，看看文字是否能够正确地折行显示而不会溢出容器。</div>
+        </div>
+        <div class="msg user">
+            <div class="avatar">U</div>
+            <div class="content">帮我写一段代码</div>
+        </div>
+        <div class="msg">
+            <div class="avatar">AI</div>
+            <div class="content">好的，请问你需要什么语言的代码？实现什么功能？</div>
+        </div>
+    </div>
+</body>
+
+</html>
