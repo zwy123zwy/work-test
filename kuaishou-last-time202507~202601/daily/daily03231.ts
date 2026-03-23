@@ -283,3 +283,28 @@ function lengthOfLIS(arr: number[]) {
     }
     return Math.max(...dp)
 }
+
+function asyncGenerator(generatorFunc) { 
+    return function (...args) { 
+        const generator = generatorFunc(...args);
+        return new Promise((resolve, reject) => { 
+            function step(nextFunc) {
+                let next;
+                try { 
+                    next = nextFunc();
+                } catch (error) { 
+                    return reject(error);
+                }
+                if (next.done) { 
+                    return resolve(next.value);
+                }
+                Promise.resolve(next.value).then(
+                    (v) => step(() => generator.next(v)),
+                    (e) => step(() => generator.throw(e))
+                );
+            }
+            step(() => generator.next());
+        });
+    }
+    
+}
