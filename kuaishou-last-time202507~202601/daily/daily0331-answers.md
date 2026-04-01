@@ -1,5 +1,7 @@
 # daily0331 全部答案（03311~03314）
 
+场景设计题在数据中有 `designThinking`（分步设计思路），生成 `solution` 时会出现在 **【设计思路】** 区块（见 `daily0329-utils.js` 的 `buildSolution`）。完整手写参考代码可按套拆分：`daily03311-full-code.js` … `daily03314-full-code.js`，或仍用聚合入口 `daily0331-full-code.js`。
+
 ## daily03311（1-20）
 - `3311.1`：`undefined`。`var` 声明提升，赋值不提升。
 - `3311.2`：`ReferenceError`。`let` 有暂时性死区。
